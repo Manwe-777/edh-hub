@@ -254,7 +254,6 @@ body {
 }
 .tally-sq::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, .32); }
 .tally-sq span { position: relative; }
-.tally-sq.zero span { opacity: .6; }
 .tally-sq.lethal { outline-color: #ffd84d; color: #ffd84d; }
 
 /* counter bar */

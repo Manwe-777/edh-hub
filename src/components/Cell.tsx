@@ -152,20 +152,19 @@ interface TallySquare {
   dmg: number;
 }
 
-/** Per other active player, one square per commander with the damage it dealt to `p`. */
+/** Per other active player, one square per commander that has dealt damage to `p`. */
 function tallySources(game: Game, p: Player): TallySquare[][] {
   const out: TallySquare[][] = [];
   for (let i = 0; i < game.playerCount; i++) {
     if (i === p.id) continue;
     const s = game.players[i];
-    out.push(
-      Array.from({ length: s.commanderCount }, (_, c) => ({
-        key: `${i}-${c}`,
-        color: s.color,
-        art: s.commanders[c].art,
-        dmg: p.cmdDamage[i][c],
-      })),
-    );
+    const squares = Array.from({ length: s.commanderCount }, (_, c) => ({
+      key: `${i}-${c}`,
+      color: s.color,
+      art: s.commanders[c].art,
+      dmg: p.cmdDamage[i][c],
+    })).filter((t) => t.dmg > 0);
+    if (squares.length) out.push(squares);
   }
   return out;
 }
@@ -224,7 +223,7 @@ function Tally(props: {
           {g.map((t) => (
             <div
               key={t.key}
-              className={`tally-sq${t.dmg === 0 ? ' zero' : ''}${t.dmg >= 21 ? ' lethal' : ''}`}
+              className={`tally-sq${t.dmg >= 21 ? ' lethal' : ''}`}
               style={{
                 width: layout.size,
                 background: t.art ? `center 30% / cover url("${t.art}")` : t.color,
