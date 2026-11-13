@@ -351,10 +351,10 @@ function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad;
   const { cols, rows, row, btn } = manaLayout(POOL_MANA.length, lw - 16, Math.max(0, h - pad.top - pad.bottom - 8));
   const change = (c: (typeof MANA)[number], n: number) => () => mutate((g) => addMana(g, p.id, c, n));
   const minus = (c: (typeof MANA)[number]) => (
-    <Press className="sq-btn" style={{ width: btn, height: btn }} onTap={change(c, -1)} label={`Remove ${c}`}>−</Press>
+    <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, -1)} label={`Remove ${c}`}>−</Press>
   );
   const plus = (c: (typeof MANA)[number]) => (
-    <Press className="sq-btn" style={{ width: btn, height: btn }} onTap={change(c, 1)} label={`Add ${c}`}>+</Press>
+    <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, 1)} label={`Add ${c}`}>+</Press>
   );
   return (
     <div ref={ref} className={`mana-shade${leaving ? ' leaving' : ''}`}>
@@ -432,7 +432,7 @@ function CounterButton({ game, p, k, size }: { game: Game; p: Player; k: Counter
   const v = p.counters[k];
   return (
     <Press
-      className={`ctr${v > 0 ? ' on' : ''}${k === 'poison' && v >= 10 ? ' lethal' : ''}`}
+      className={`ctr ctr-${k}${v > 0 ? ' on' : ''}${k === 'poison' && v >= 10 ? ' lethal' : ''}`}
       style={style}
       label={k}
       onTap={() => mutate((g) => addCounter(g, p.id, k, 1))}

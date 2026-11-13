@@ -209,6 +209,7 @@ body {
   touch-action: none;
   transition: background-color .16s ease-out;
 }
+.sq-btn.bare { background: none; font-size: 30px; font-weight: 300; }
 .sq-btn.pressed { background: color-mix(in srgb, var(--ink) 32%, transparent); transition: none; }
 
 /* mana pool: a shade over the whole cell, sliding down from the top */
@@ -282,7 +283,8 @@ body {
 .ctr.on { background: color-mix(in srgb, var(--ink) 14%, transparent); border-color: var(--ink); }
 .ctr.pressed { background: color-mix(in srgb, var(--ink) 30%, transparent); transition: none; }
 .ctr.lethal { color: #ffd84d; border-color: #ffd84d; }
-.bar.mana-mode .ctr:not(.ctr-mana) { opacity: 0; pointer-events: none; }
+/* storm is counted while casting from the pool, so it stays usable over the shade */
+.bar.mana-mode .ctr:not(.ctr-mana, .ctr-storm) { opacity: 0; pointer-events: none; }
 .badge {
   position: absolute;
   top: -4px;
@@ -447,7 +449,7 @@ input::placeholder { color: var(--muted); }
 .group h3 small { font-size: 12px; font-weight: 400; opacity: .7; }
 
 /* three equal action tiles */
-.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
 .tile {
   height: 92px;
   display: flex;

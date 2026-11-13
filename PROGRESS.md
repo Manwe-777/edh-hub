@@ -41,6 +41,8 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - Reset is a single "Reset all" tile (undoable).
 - Roll result shows only the number; the winner's number pulses.
 - Optional commander damage tally (menu switch, off by default): a strip on each cell's right edge with one tile per opponent (partner commanders side by side, each square showing art or player color) and the damage taken from it (commanders with no damage are left out, and a cell with none shows no strip); tapping it opens that player's commander damage view.
+- "Reset players" tile: every seat gets a fresh player (one commander, no art, distinct random colors, counters tax / storm / poison + mana) and the game resets. These are also the defaults for new installs.
+- Storm stays usable while the mana pool shade is open; the pool's +/− have no button background.
 
 ## Next
 

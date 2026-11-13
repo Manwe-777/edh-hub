@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type Game, resetGame, rollDie, rollHigh } from '../game';
+import { type Game, resetGame, resetPlayers, rollDie, rollHigh } from '../game';
 import { mutate, undo, useStore } from '../store';
 import { UiIcon } from './icons';
 
@@ -40,6 +40,10 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
           <button className="tile danger" onClick={andClose(() => mutate((g) => resetGame(g)))}>
             <UiIcon name="reset" size={26} />
             <span>Reset all</span>
+          </button>
+          <button className="tile danger" onClick={andClose(() => mutate((g) => resetPlayers(g)))}>
+            <UiIcon name="users" size={26} />
+            <span>Reset players</span>
           </button>
         </div>
 

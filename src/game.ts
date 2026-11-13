@@ -12,7 +12,7 @@ export type CounterKey = NumericCounter | TokenCounter;
 
 export const NUMERIC_COUNTERS: NumericCounter[] = ['poison', 'experience', 'energy', 'rad', 'tax', 'storm'];
 export const ALL_COUNTERS: CounterKey[] = ['poison', 'experience', 'monarch', 'initiative', 'energy', 'rad', 'tax', 'storm'];
-export const DEFAULT_COUNTERS: CounterKey[] = ['poison', 'experience', 'monarch'];
+export const DEFAULT_COUNTERS: CounterKey[] = ['tax', 'storm', 'poison'];
 export const MAX_VISIBLE_COUNTERS = 5;
 
 export const COUNTER_LABEL: Record<CounterKey, string> = {
@@ -98,7 +98,7 @@ export function newPlayer(id: number, life: number): Player {
     id,
     name: `Player ${id + 1}`,
     color: PALETTE[id % PALETTE.length],
-    commanderCount: 2,
+    commanderCount: 1,
     commanders: [emptyCommander(), emptyCommander()],
     life,
     cmdDamage: zeroDamage(),
@@ -164,6 +164,17 @@ export function addCounter(g: Game, id: number, key: NumericCounter, delta: numb
 export function addMana(g: Game, id: number, color: ManaColor, delta: number) {
   const m = g.players[id].mana;
   m[color] = Math.max(0, m[color] + delta);
+}
+
+/** Every seat back to a fresh player (default name, counters, one commander, no art) with distinct random colors; also resets the game. */
+export function resetPlayers(g: Game) {
+  const colors = [...PALETTE];
+  for (let i = colors.length - 1; i > 0; i--) {
+    const j = d(i + 1) - 1;
+    [colors[i], colors[j]] = [colors[j], colors[i]];
+  }
+  g.players = g.players.map((_, i) => ({ ...newPlayer(i, g.startingLife), color: colors[i % colors.length] }));
+  resetGame(g);
 }
 
 export function resetGame(g: Game) {
