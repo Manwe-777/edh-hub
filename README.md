@@ -1,8 +1,8 @@
 # EDH Hub
 
 [![Latest release](https://img.shields.io/github/v/release/Manwe-777/edh-hub)](https://github.com/Manwe-777/edh-hub/releases/latest)
-[![Release](https://github.com/Manwe-777/edh-hub/actions/workflows/release.yml/badge.svg)](https://github.com/Manwe-777/edh-hub/actions/workflows/release.yml)
-[![Website](https://github.com/Manwe-777/edh-hub/actions/workflows/deploy.yml/badge.svg)](https://github.com/Manwe-777/edh-hub/actions/workflows/deploy.yml)
+[![Release and deploy](https://github.com/Manwe-777/edh-hub/actions/workflows/release.yml/badge.svg)](https://github.com/Manwe-777/edh-hub/actions/workflows/release.yml)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fmanwe-777.github.io%2Fedh-hub%2F)](https://manwe-777.github.io/edh-hub/)
 
 Life counter for Commander games, for 2 to 6 players around one phone. Tracks life, commander damage, poison and other counters, and the mana pool, with commander art from Scryfall.
 

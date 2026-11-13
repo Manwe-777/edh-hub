@@ -121,6 +121,14 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
             <span>Fullscreen</span>
           </button>
         </section>
+
+        <section className="group list">
+          <a className="row" href="https://github.com/Manwe-777/edh-hub" target="_blank" rel="noreferrer">
+            <UiIcon name="github" size={20} />
+            <span>EDH Hub on GitHub</span>
+            <span className="row-meta">{/^\d/.test(__APP_VERSION__) ? `v${__APP_VERSION__}` : __APP_VERSION__}</span>
+          </a>
+        </section>
       </div>
     </div>
   );

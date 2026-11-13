@@ -520,6 +520,8 @@ input::placeholder { color: var(--muted); }
   text-align: left;
   cursor: pointer;
 }
+.row { text-decoration: none; }
+.row-meta { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 .row + .row { box-shadow: 0 -1px 0 var(--surface-2); }
 .row > span:first-of-type { flex: 1; }
 .row:active { background: var(--surface-2); }

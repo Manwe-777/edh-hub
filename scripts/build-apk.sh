@@ -11,7 +11,7 @@ version="${2:-$(node -p "require('./package.json').version")}"
 export JAVA_HOME="${JAVA_HOME:-$(mise where java@temurin-21)}"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
 
-npm run build
+APP_VERSION="$version" npm run build
 npx cap sync android
 
 task="assemble${type^}"

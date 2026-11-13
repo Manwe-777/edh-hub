@@ -1,4 +1,4 @@
-name: Release
+name: Release and deploy
 
 on:
   push:
@@ -8,6 +8,8 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: release
@@ -45,3 +47,20 @@ jobs:
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build website
+        run: |
+          git fetch --tags --force
+          APP_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//') npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: release
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

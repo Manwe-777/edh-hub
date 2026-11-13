@@ -46,8 +46,8 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 
 ## Hosting and releases
 
-- Repo: https://github.com/Manwe-777/edh-hub (public). Site: https://manwe-777.github.io/edh-hub/ (`deploy.yml`, every push to `main`).
-- `release.yml` runs semantic-release on every push to `main`: `feat:` / `fix:` commits create a version tag and a GitHub release with the signed APK (`edh-hub-<version>.apk`). The version lives in the tags; `package.json` stays at 0.1.0.
+- Repo: https://github.com/Manwe-777/edh-hub (public). Site: https://manwe-777.github.io/edh-hub/, deployed by `release.yml` after the release step on every push to `main`.
+- `release.yml` runs semantic-release on every push to `main`: `feat:` / `fix:` commits create a version tag and a GitHub release with the signed APK (`edh-hub-<version>.apk`). The version lives in the tags (`package.json` stays at 0.1.0); builds read it from `APP_VERSION` or the latest tag and show it in the menu next to the GitHub link.
 - CI signing secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`.
 - Android `versionCode` = major*10000 + minor*100 + patch, passed as `-PappVersion`.
 - Commit messages follow Conventional Commits and carry no assistant attribution trailers.
