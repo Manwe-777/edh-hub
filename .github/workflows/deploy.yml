@@ -28,8 +28,11 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+  # Dormant until Pages is available for this repo: enable Pages (Settings → Pages →
+  # Source: GitHub Actions) and set the repository variable PAGES_ENABLED=true.
   deploy:
     needs: build
+    if: vars.PAGES_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

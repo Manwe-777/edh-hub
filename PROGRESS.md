@@ -44,6 +44,11 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - "Reset players" tile: every seat gets a fresh player (one commander, no art, distinct random colors, counters tax / storm / poison + mana) and the game resets. These are also the defaults for new installs.
 - Storm stays usable while the mana pool shade is open; the pool's +/− have no button background.
 
+## Hosting
+
+- Repo: https://github.com/Manwe-777/edh-hub (private).
+- `.github/workflows/deploy.yml` builds on every push to `main`; the Pages deploy job runs only when the repository variable `PAGES_ENABLED` is `true`. To go live: make the repo public (or use a plan with private Pages), Settings → Pages → Source: GitHub Actions, then `gh variable set PAGES_ENABLED --body true` and re-run the workflow. The site is served from `https://manwe-777.github.io/edh-hub/` (Vite `base: './'` makes the sub-path work).
+
 ## Android
 
 - Capacitor 8 wrapper in `android/` (app id `com.manuh.edhhub`, portrait, full-screen with system bars hidden, dark launch screen, launcher icons from `public/icon.svg`).
