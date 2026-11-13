@@ -4,7 +4,7 @@ import { mutate, undo, useStore } from '../store';
 
 const LIFE_PRESETS = [20, 30, 40];
 
-export function CenterMenu({ game, onClose }: { game: Game; onClose: () => void }) {
+export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: boolean; onClose: () => void }) {
   const { undo: undoStack } = useStore();
   const [confirmReset, setConfirmReset] = useState(false);
   const [custom, setCustom] = useState('');
@@ -16,7 +16,7 @@ export function CenterMenu({ game, onClose }: { game: Game; onClose: () => void 
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className={`modal-backdrop${leaving ? ' leaving' : ''}`} onClick={onClose}>
       <div className="menu" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
           <h2>Menu</h2>

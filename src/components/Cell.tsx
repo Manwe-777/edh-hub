@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
-  type CounterKey, type Game, type Player, MANA,
+  type CounterKey, type Game, type Player, MANA, POOL_MANA,
   addCmdDamage, addCounter, addLife, addMana, lossCause,
 } from '../game';
 import { ROTATION, type Seat } from '../layouts';
 import { mutate } from '../store';
 import { useDefeatLine } from '../defeat';
+import { usePresence } from '../usePresence';
 import { Rotated, localSize } from './Rotated';
 import { Press } from './PressButton';
 import { CounterIcon, ManaPoolIcon, ManaSymbol } from './icons';
 
 const GAP = 3;
+const NAME_H = 24;
 
 interface CellProps {
   game: Game;
@@ -45,8 +47,6 @@ function useLifeDelta(life: number, epoch: number) {
   return delta;
 }
 
-const inCmdView = (g: Game) => g.view.kind === 'cmd';
-
 export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
   const w = seat.w * vw - GAP * 2;
   const h = seat.h * vh - GAP * 2;
@@ -56,13 +56,16 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
   const defeat = useDefeatLine(p.id, cause);
   const delta = useLifeDelta(p.life, game.epoch);
 
-  const barH = inCmdView(game) ? 0 : Math.round(Math.max(42, Math.min(56, lh * 0.2)));
-  const bodyH = lh - barH - 22;
-  const lifeFont = Math.max(28, Math.min(lw * 0.28, bodyH * 0.62));
-
   const view = game.view;
   const inCmd = view.kind === 'cmd';
   const isTarget = inCmd && view.target === p.id;
+  const manaShown = p.manaOpen && !inCmd && !game.roll;
+  const mana = usePresence(manaShown, 220);
+
+  const barH = inCmd ? 0 : Math.round(Math.max(42, Math.min(56, lh * 0.2)));
+  const bodyH = lh - barH - NAME_H;
+  const lifeFont = Math.max(28, Math.min(lw * 0.28, bodyH * 0.66));
+  const pad = { top: NAME_H, bottom: barH };
 
   const swipe = (d: 'up' | 'down') => {
     if (d === 'up') mutate((g) => void (g.view = { kind: 'cmd', target: p.id }), false);
@@ -79,11 +82,9 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
 
   let body;
   if (game.roll) {
-    body = <RollResult game={game} p={p} font={lifeFont} />;
+    body = <RollResult key={game.roll.id} game={game} p={p} font={lifeFont} />;
   } else if (inCmd && !isTarget) {
-    body = <DamageControls game={game} source={p} target={game.players[view.target]} rotation={rotation} swipe={swipe} font={lifeFont} lw={lw} />;
-  } else if (p.manaOpen && !inCmd) {
-    body = <ManaOverlay p={p} lw={lw} lh={lh - barH - 22} />;
+    body = <DamageControls source={p} target={game.players[view.target]} rotation={rotation} swipe={swipe} font={lifeFont} pad={pad} />;
   } else {
     body = (
       <LifeArea
@@ -93,44 +94,52 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
         font={lifeFont}
         defeat={defeat}
         delta={delta}
+        pad={pad}
         caption={isTarget ? 'Commander damage' : null}
       />
     );
   }
 
   const arts = p.commanders.slice(0, p.commanderCount).map((c) => c.art).filter(Boolean) as string[];
+  const cls = [
+    'cell',
+    cause ? 'lost' : arts.length ? 'has-art' : 'plain',
+    isTarget && 'target',
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className={`cell${cause ? ' lost' : ''}${isTarget ? ' target' : ''}${game.roll?.winner === p.id ? ' winner' : ''}`} style={style}>
-      <Rotated w={w} h={h} dir={seat.dir} className="cell-inner" style={{ ['--pc' as string]: p.color }}>
+    <div className={cls} style={style}>
+      <Rotated w={w} h={h} dir={seat.dir} className={`cell-inner${mana.mounted ? ' mana-open' : ''}`} style={{ ['--pc' as string]: p.color }}>
         <div className="cell-bg">
-          {arts.length === 0 && <div className="bg-color" />}
-          {arts.map((a, i) => (
+          {!cause && arts.map((a, i) => (
             <div key={i} className="bg-art" style={{ backgroundImage: `url("${a}")`, width: `${100 / arts.length}%`, left: `${(100 / arts.length) * i}%` }} />
           ))}
-          <div className="bg-scrim" />
         </div>
-        <div className="cell-name" style={{ height: 22 }}>
+        <div className="cell-layer">{body}</div>
+        {mana.mounted && <ManaOverlay p={p} lw={lw} pad={pad} leaving={mana.leaving} />}
+        <div className="cell-name" style={{ height: NAME_H }}>
           {game.monarch === p.id && <span className="name-token"><CounterIcon k="monarch" /></span>}
           {game.initiative === p.id && <span className="name-token"><CounterIcon k="initiative" /></span>}
-          {p.name}
-          {p.manaOpen && !inCmd && <span className="name-life">· {p.life} life</span>}
+          <span className="name-text">{p.name}</span>
+          {manaShown && <span className="name-life">{p.life}</span>}
           {inCmd && !isTarget && <span className="dealt">→ {game.players[view.target].name}</span>}
         </div>
-        <div className="cell-body" style={{ top: 22, bottom: barH }}>
-          {body}
-        </div>
-        {barH > 0 && <CounterBar game={game} p={p} h={barH} lw={lw} />}
+        {barH > 0 && <CounterBar game={game} p={p} h={barH} lw={lw} manaMode={mana.mounted} />}
       </Rotated>
     </div>
   );
 }
 
+interface Pad {
+  top: number;
+  bottom: number;
+}
+
 function LifeArea(props: {
   p: Player; rotation: number; swipe: (d: 'up' | 'down') => void; font: number;
-  defeat: string | null; delta: number; caption: string | null;
+  defeat: string | null; delta: number; caption: string | null; pad: Pad;
 }) {
-  const { p, rotation, swipe, font, defeat, delta, caption } = props;
+  const { p, rotation, swipe, font, defeat, delta, caption, pad } = props;
   const change = (n: number) => () => mutate((g) => addLife(g, p.id, n));
   return (
     <>
@@ -140,21 +149,18 @@ function LifeArea(props: {
       <Press className="half right" rotation={rotation} onTap={change(1)} onHold={change(10)} onSwipe={swipe} label="Gain life">
         <span className="pm">+</span>
       </Press>
-      <div className="life-wrap">
-        {caption && <div className="caption"><i className="ms ms-commander" /> {caption}</div>}
+      <div className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
+        {caption && <div className="caption">{caption}</div>}
         {defeat ? (
-          <>
-            <div key={defeat} className="defeat" style={{ fontSize: Math.max(18, font * 0.32) }}>
-              <i className="ms ms-counter-skull" /> {defeat}
-            </div>
-            <div className="life small" style={{ fontSize: font * 0.4 }}>{p.life}</div>
-          </>
+          <div key={defeat} className="defeat" style={{ fontSize: Math.max(20, font * 0.34) }}>{defeat}</div>
         ) : (
-          <div className="life" style={{ fontSize: font }}>{p.life}</div>
-        )}
-        {delta !== 0 && (
-          <div className="delta" style={{ fontSize: Math.max(14, font * 0.22) }}>
-            {delta > 0 ? `+${delta}` : delta}
+          <div className="life" style={{ fontSize: font }}>
+            {p.life}
+            {delta !== 0 && (
+              <span className="delta" style={{ fontSize: Math.max(18, font * 0.34) }}>
+                {delta > 0 ? `+${delta}` : `−${-delta}`}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -164,10 +170,10 @@ function LifeArea(props: {
 
 /** In a commander-damage view: what this cell's commanders dealt to the target. */
 function DamageControls(props: {
-  game: Game; source: Player; target: Player; rotation: number;
-  swipe: (d: 'up' | 'down') => void; font: number; lw: number;
+  source: Player; target: Player; rotation: number;
+  swipe: (d: 'up' | 'down') => void; font: number; pad: Pad;
 }) {
-  const { source: s, target: t, rotation, swipe, font } = props;
+  const { source: s, target: t, rotation, swipe, font, pad } = props;
   const dmg = t.cmdDamage[s.id];
   const change = (c: 0 | 1, n: number) => () => mutate((g) => addCmdDamage(g, t.id, s.id, c, n));
 
@@ -175,13 +181,13 @@ function DamageControls(props: {
     return (
       <>
         <Press className="half left" rotation={rotation} onTap={change(0, -1)} onHold={change(0, -10)} onSwipe={swipe} label="Remove damage">
-          <span className="pm">−</span>
+          <span className="pm from-left">−</span>
         </Press>
         <Press className="half right" rotation={rotation} onTap={change(0, 1)} onHold={change(0, 10)} onSwipe={swipe} label="Add damage">
-          <span className="pm">+</span>
+          <span className="pm from-right">+</span>
         </Press>
-        <div className="life-wrap">
-          <div className={`life dmg${dmg[0] >= 21 ? ' lethal' : ''}`} style={{ fontSize: font }}>
+        <div className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
+          <div className={`life dmg pop-in${dmg[0] >= 21 ? ' lethal' : ''}`} style={{ fontSize: font }}>
             <i className="ms ms-commander" />{dmg[0]}
           </div>
         </div>
@@ -190,7 +196,7 @@ function DamageControls(props: {
   }
 
   const col = (c: 0 | 1) => (
-    <div className="dmg-col">
+    <div className={`dmg-col from-${c === 0 ? 'left' : 'right'}`}>
       <div className="dmg-row">
         <Press className="sq-btn" rotation={rotation} onTap={change(c, -1)} onHold={change(c, -10)} onSwipe={swipe} label="Remove damage">−</Press>
         <div className={`dmg-num${dmg[c] >= 21 ? ' lethal' : ''}`} style={{ fontSize: Math.min(font * 0.55, 56) }}>{dmg[c]}</div>
@@ -200,7 +206,7 @@ function DamageControls(props: {
     </div>
   );
   return (
-    <Press className="dmg-two" rotation={rotation} onSwipe={swipe}>
+    <Press className="dmg-two" rotation={rotation} onSwipe={swipe} style={{ paddingTop: pad.top, paddingBottom: pad.bottom }}>
       <div className="dmg-cols">
         {col(0)}
         {col(1)}
@@ -209,15 +215,15 @@ function DamageControls(props: {
   );
 }
 
-/** Grid shapes for the six mana entries; picks whichever gives the largest buttons. */
-function manaLayout(w: number, h: number) {
+/** Grid shapes for the mana entries; picks whichever gives the largest buttons. */
+function manaLayout(n: number, w: number, h: number) {
   const g = 6;
   const label = 30; // count + symbol line
-  const opts = [
-    { cols: 6, rows: 1, row: false },
-    { cols: 3, rows: 2, row: false },
-    { cols: 2, rows: 3, row: true },
-    { cols: 3, rows: 2, row: true },
+  const shapes = [
+    { cols: n, rows: 1, row: false },
+    { cols: Math.ceil(n / 2), rows: 2, row: false },
+    { cols: 2, rows: Math.ceil(n / 2), row: true },
+    { cols: Math.ceil(n / 2), rows: 2, row: true },
   ].map((o) => {
     const colW = (w - g * (o.cols - 1)) / o.cols;
     const rowH = (h - g * (o.rows - 1)) / o.rows;
@@ -225,12 +231,15 @@ function manaLayout(w: number, h: number) {
     const btn = o.row ? Math.min((colW - 64) / 2, rowH) : Math.min(colW, (rowH - label - 4) / 2);
     return { ...o, btn };
   });
-  const best = opts.reduce((a, b) => (b.btn > a.btn ? b : a));
+  const best = shapes.reduce((a, b) => (b.btn > a.btn ? b : a));
   return { ...best, btn: Math.floor(Math.max(28, Math.min(56, best.btn))) };
 }
 
-function ManaOverlay({ p, lw, lh }: { p: Player; lw: number; lh: number }) {
-  const { cols, rows, row, btn } = manaLayout(lw - 16, lh - 8);
+function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad; leaving: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [h, setH] = useState(0);
+  useEffect(() => setH(ref.current?.clientHeight ?? 0), []);
+  const { cols, rows, row, btn } = manaLayout(POOL_MANA.length, lw - 16, Math.max(0, h - pad.top - pad.bottom - 8));
   const change = (c: (typeof MANA)[number], n: number) => () => mutate((g) => addMana(g, p.id, c, n));
   const minus = (c: (typeof MANA)[number]) => (
     <Press className="sq-btn" style={{ width: btn, height: btn }} onTap={change(c, -1)} label={`Remove ${c}`}>−</Press>
@@ -239,25 +248,38 @@ function ManaOverlay({ p, lw, lh }: { p: Player; lw: number; lh: number }) {
     <Press className="sq-btn" style={{ width: btn, height: btn }} onTap={change(c, 1)} label={`Add ${c}`}>+</Press>
   );
   return (
-    <div className="mana" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }}>
-      {MANA.map((c) => (
-        <div key={c} className={`mana-entry${row ? ' row' : ''}`}>
-          {row ? minus(c) : plus(c)}
-          <div className="mana-count" style={{ fontSize: Math.max(14, Math.min(22, btn * 0.45)) }}>
-            <span>{p.mana[c]}</span><span className="x">x</span><ManaSymbol c={c} />
-          </div>
-          {row ? plus(c) : minus(c)}
+    <div ref={ref} className={`mana-shade${leaving ? ' leaving' : ''}`}>
+      {h > 0 && (
+        <div
+          className="mana"
+          style={{
+            top: pad.top,
+            bottom: pad.bottom,
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gridTemplateRows: `repeat(${rows}, 1fr)`,
+          }}
+        >
+          {POOL_MANA.map((c) => (
+            <div key={c} className={`mana-entry${row ? ' row' : ''}`}>
+              {row ? minus(c) : plus(c)}
+              <div className="mana-count" style={{ fontSize: Math.max(16, Math.min(24, btn * 0.48)) }}>
+                <span>{p.mana[c]}</span>
+                <ManaSymbol c={c} />
+              </div>
+              {row ? plus(c) : minus(c)}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
-function CounterBar({ game, p, h, lw }: { game: Game; p: Player; h: number; lw: number }) {
+function CounterBar({ game, p, h, lw, manaMode }: { game: Game; p: Player; h: number; lw: number; manaMode: boolean }) {
   const items: (CounterKey | 'mana')[] = [...p.visibleCounters, 'mana'];
   const size = Math.min(h - 4, lw / items.length - 6);
   return (
-    <div className="bar" style={{ height: h }}>
+    <div className={`bar${manaMode ? ' mana-mode' : ''}`} style={{ height: h }}>
       {items.map((k) => (
         <CounterButton key={k} game={game} p={p} k={k} size={size} />
       ))}
@@ -268,10 +290,10 @@ function CounterBar({ game, p, h, lw }: { game: Game; p: Player; h: number; lw: 
 function CounterButton({ game, p, k, size }: { game: Game; p: Player; k: CounterKey | 'mana'; size: number }) {
   const style = { width: size, height: size, fontSize: size * 0.56 };
   if (k === 'mana') {
-    const total = Object.values(p.mana).reduce((a, b) => a + b, 0);
+    const total = POOL_MANA.reduce((a, c) => a + p.mana[c], 0);
     return (
       <Press
-        className={`ctr${p.manaOpen ? ' on' : ''}`}
+        className={`ctr ctr-mana${p.manaOpen ? ' on' : ''}`}
         style={style}
         label="Mana pool"
         onTap={() => mutate((g) => void (g.players[p.id].manaOpen = !g.players[p.id].manaOpen), false)}
@@ -313,17 +335,54 @@ function CounterButton({ game, p, k, size }: { game: Game; p: Player; k: Counter
   );
 }
 
+const SPIN_MS = 2000;
+
+/** Flickers random d20 faces, slowing down, then settles on `final`. */
+function useSpin(final: number) {
+  const [value, setValue] = useState(() => 1 + Math.floor(Math.random() * 20));
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    let elapsed = 0;
+    let delay = 45;
+    let timer = 0;
+    const step = () => {
+      elapsed += delay;
+      if (elapsed >= SPIN_MS) {
+        setValue(final);
+        setDone(true);
+        return;
+      }
+      setValue((v) => {
+        let n = v;
+        while (n === v) n = 1 + Math.floor(Math.random() * 20);
+        return n;
+      });
+      delay = 45 + 320 * (elapsed / SPIN_MS) ** 2;
+      timer = window.setTimeout(step, delay);
+    };
+    timer = window.setTimeout(step, delay);
+    return () => window.clearTimeout(timer);
+  }, [final]);
+  return { value, done };
+}
+
 function RollResult({ game, p, font }: { game: Game; p: Player; font: number }) {
   const roll = game.roll!;
   const mine = roll.rounds.map((r) => r[p.id]).filter((v): v is number => v !== null);
   const win = roll.winner === p.id;
+  const { value, done } = useSpin(mine[mine.length - 1]);
   return (
-    <Press className="roll" onTap={() => mutate((g) => void (g.roll = null), false)} label="Dismiss roll">
-      <div className="roll-val" style={{ fontSize: font * 0.8 }}>
-        <i className="ms ms-ability-d20" /> {mine[mine.length - 1]}
+    <Press
+      className={`roll${done ? ' settled' : ''}${done && win ? ' win' : ''}`}
+      onTap={() => mutate((g) => void (g.roll = null), false)}
+      label="Dismiss roll"
+    >
+      {done && win && <div className="winner-fx" />}
+      <div className={`roll-val${done ? ' pop-in' : ''}`} style={{ fontSize: font * 0.8 }}>
+        <i className="ms ms-ability-d20" /> {value}
       </div>
-      {mine.length > 1 && <div className="roll-hist">{mine.join(' → ')}</div>}
-      <div className="roll-tag">{win ? 'Highest roll — you start!' : ' '}</div>
+      <div className="roll-hist">{done && mine.length > 1 ? `tie-break: ${mine.join(' → ')}` : '\u00a0'}</div>
+      <div className="roll-tag">{done && win ? 'Highest roll — you start!' : '\u00a0'}</div>
     </Press>
   );
 }

@@ -1,6 +1,8 @@
 export type Dir = 'd' | 'u' | 'l' | 'r';
 export type ManaColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C';
 export const MANA: ManaColor[] = ['W', 'U', 'B', 'R', 'G', 'C'];
+/** Colors shown in the mana pool overlay. */
+export const POOL_MANA: ManaColor[] = ['W', 'U', 'B', 'R', 'G'];
 
 /** Numeric counters a player can track. */
 export type NumericCounter = 'poison' | 'experience' | 'energy' | 'rad' | 'tax' | 'storm';
@@ -24,7 +26,13 @@ export const COUNTER_LABEL: Record<CounterKey, string> = {
   storm: 'Storm',
 };
 
+/** Bright, slightly pastel cell colors; text and icons on them are black. */
 export const PALETTE = [
+  '#8ab8f0', '#f4978e', '#8fd9a8', '#c3a6ef', '#f7c77e', '#7fd6cf',
+  '#f4a6cb', '#c9d1db', '#e3cf9f', '#a9adf5',
+];
+/** First palette, mapped index-for-index onto the current one when loading old saves. */
+const OLD_PALETTE = [
   '#2f6fb3', '#b8423a', '#2f8f55', '#7b4bb0', '#c27c1a', '#1f8f8a',
   '#b2457f', '#5a6472', '#8a6d3b', '#3c3f99',
 ];
@@ -51,6 +59,8 @@ export interface Player {
 }
 
 export interface Roll {
+  /** Identifies this roll so the cells replay the spin once per roll. */
+  id: number;
   /** rounds[r][playerId] = value rolled, or null if that player didn't roll that round */
   rounds: (number | null)[][];
   winner: number;
@@ -185,7 +195,7 @@ export function rollHigh(g: Game) {
     const max = Math.max(...contenders.map((i) => r[i]!));
     const tops = contenders.filter((i) => r[i] === max);
     if (tops.length === 1) {
-      g.roll = { rounds, winner: tops[0] };
+      g.roll = { id: Date.now(), rounds, winner: tops[0] };
       return;
     }
     contenders = tops;
@@ -201,9 +211,11 @@ export function migrate(raw: unknown): Game {
   const out: Game = { ...base, ...g };
   out.players = g.players.map((p, i) => {
     const np = newPlayer(i, g.startingLife ?? 40);
+    const old = OLD_PALETTE.indexOf(p.color);
     return {
       ...np,
       ...p,
+      color: old >= 0 ? PALETTE[old] : p.color,
       counters: { ...np.counters, ...(p.counters ?? {}) },
       mana: { ...np.mana, ...(p.mana ?? {}) },
       cmdDamage: Array.isArray(p.cmdDamage) && p.cmdDamage.length === MAX_PLAYERS ? p.cmdDamage : np.cmdDamage,

@@ -31,6 +31,11 @@ export function usePress(opts: PressOptions) {
   const t = useRef<Track | null>(null);
   const timers = useRef<{ hold?: number; rep?: number }>({});
 
+  const el = useRef<HTMLElement | null>(null);
+  const release = () => {
+    el.current?.classList.remove('pressed');
+    el.current = null;
+  };
   const clear = () => {
     window.clearTimeout(timers.current.hold);
     window.clearInterval(timers.current.rep);
@@ -47,6 +52,8 @@ export function usePress(opts: PressOptions) {
         /* pointer already gone */
       }
       t.current = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false, held: false };
+      el.current = e.currentTarget;
+      el.current.classList.add('pressed');
       if (o.current.onHold) {
         timers.current.hold = window.setTimeout(() => {
           if (!t.current) return;
@@ -71,6 +78,7 @@ export function usePress(opts: PressOptions) {
       const s = t.current;
       if (!s || s.id !== e.pointerId) return;
       clear();
+      release();
       t.current = null;
       if (s.held) return;
       if (!s.moved) {
@@ -89,6 +97,7 @@ export function usePress(opts: PressOptions) {
     },
     onPointerCancel() {
       clear();
+      release();
       t.current = null;
     },
     onContextMenu(e: React.MouseEvent) {

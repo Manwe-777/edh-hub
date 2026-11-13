@@ -10,8 +10,8 @@ import { isSideways } from '../layouts';
 import { CounterIcon } from './icons';
 
 /** Full-screen options panel, drawn in the player's own orientation. */
-export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: number; vh: number; onClose: () => void }) {
-  const { game, id, dir, vw, vh, onClose } = props;
+export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: number; vh: number; leaving: boolean; onClose: () => void }) {
+  const { game, id, dir, vw, vh, leaving, onClose } = props;
   const p = game.players[id];
   const set = (fn: (g: Game) => void) => mutate(fn, false);
   // Ignore the click that ends the swipe which opened this panel.
@@ -27,7 +27,7 @@ export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: num
     });
 
   return (
-    <div className="modal-backdrop" onClick={backdrop}>
+    <div className={`modal-backdrop${leaving ? ' leaving' : ''}`} onClick={backdrop}>
       <Rotated w={vw} h={vh} dir={dir} className="sheet-wrap">
         <div className={`sheet${isSideways(dir) ? ' wide' : ''}`} onClick={(e) => e.stopPropagation()}>
           <div className="sheet-head">

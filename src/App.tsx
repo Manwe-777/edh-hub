@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePresence } from './usePresence';
 import { LAYOUTS } from './layouts';
 import { mutate, useStore } from './store';
 import { Cell } from './components/Cell';
@@ -53,6 +54,11 @@ export default function App() {
   const [menu, setMenu] = useState(false);
   const [options, setOptions] = useState<number | null>(null);
   useWakeLock(game.keepAwake);
+  const lastOptions = useRef(0);
+  if (options !== null) lastOptions.current = options;
+  const menuP = usePresence(menu);
+  const optionsP = usePresence(options !== null);
+  const optId = lastOptions.current;
 
   const layout = LAYOUTS[game.playerCount];
   const [hx, hy] = layout.hub;
@@ -86,12 +92,13 @@ export default function App() {
       >
         {inCmd || game.roll ? '✕' : <span className="hub-icon" />}
       </button>
-      {menu && <CenterMenu game={game} onClose={() => setMenu(false)} />}
-      {options !== null && options < game.playerCount && (
+      {menuP.mounted && <CenterMenu game={game} leaving={menuP.leaving} onClose={() => setMenu(false)} />}
+      {optionsP.mounted && optId < game.playerCount && (
         <PlayerOptions
           game={game}
-          id={options}
-          dir={layout.seats[options].dir}
+          id={optId}
+          leaving={optionsP.leaving}
+          dir={layout.seats[optId].dir}
           vw={vw}
           vh={vh}
           onClose={() => setOptions(null)}

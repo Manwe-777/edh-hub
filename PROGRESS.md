@@ -22,6 +22,17 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - [x] State saved synchronously on every change; reload restores everything; unreadable save backed up and a fresh game started
 - [x] GitHub Pages deploy workflow (.github/workflows/deploy.yml)
 
+## Visual pass (feedback 1)
+
+- [x] Roboto (300/400/500, bundled), no text shadows or background vignettes
+- [x] Plain cells use bright pastel colors with black text and icons; art cells get a flat dim and white text
+- [x] Life change number sits beside the total, no background, larger
+- [x] +/− halves cover the full cell height; press highlight fades out quickly (~160 ms)
+- [x] Mana pool: WUBRG only, no "x"; full-cell shade slides down from the top and back up; only the mana icon stays tappable
+- [x] Swipe panels: background fades to solid, rows slide in from alternating sides; damage controls slide in from the sides
+- [x] Dead: no skull icon, no life total, blood-red pulsing vignette background
+- [x] Roll high: numbers flicker and slow down for ~2 s, then the winner gets a turning rainbow background
+
 ## Next
 
 - [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock
