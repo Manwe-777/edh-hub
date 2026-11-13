@@ -6,6 +6,7 @@ import {
 import { mutate } from '../store';
 import { artworks, autocomplete, type ArtOption } from '../scryfall';
 import { Rotated } from './Rotated';
+import { isSideways } from '../layouts';
 import { CounterIcon } from './icons';
 
 /** Full-screen options panel, drawn in the player's own orientation. */
@@ -28,12 +29,14 @@ export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: num
   return (
     <div className="modal-backdrop" onClick={backdrop}>
       <Rotated w={vw} h={vh} dir={dir} className="sheet-wrap">
-        <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className={`sheet${isSideways(dir) ? ' wide' : ''}`} onClick={(e) => e.stopPropagation()}>
           <div className="sheet-head">
             <h2>Player options</h2>
             <button className="btn" onClick={onClose}>Done</button>
           </div>
 
+          <div className="sheet-cols">
+          <div>
           <label className="field">
             <span>Name</span>
             <input
@@ -69,10 +72,6 @@ export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: num
             </div>
           </div>
 
-          {Array.from({ length: p.commanderCount }, (_, c) => (
-            <CommanderPicker key={c} game={game} id={id} slot={c as 0 | 1} />
-          ))}
-
           <div className="field">
             <span>Counters (up to {MAX_VISIBLE_COUNTERS})</span>
             <div className="counter-pick">
@@ -82,6 +81,14 @@ export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: num
                 </button>
               ))}
             </div>
+          </div>
+          </div>
+          <div>
+          {Array.from({ length: p.commanderCount }, (_, c) => (
+            <CommanderPicker key={c} game={game} id={id} slot={c as 0 | 1} />
+          ))}
+
+          </div>
           </div>
         </div>
       </Rotated>

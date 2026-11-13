@@ -25,5 +25,5 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 ## Next
 
 - [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock
-- [ ] Player options sheet layout for sideways seats (uses a narrow column today)
-- [ ] Capacitor wrapper + debug APK over adb
+- [x] Player options sheet uses two columns for sideways seats
+- [ ] Capacitor wrapper + debug APK over adb (Android SDK found at ~/Android/Sdk)
