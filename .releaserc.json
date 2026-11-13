@@ -1,0 +1,21 @@
+{
+  "branches": ["main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "scripts/build-apk.sh release ${nextRelease.version} && cp releases/edh-hub-${nextRelease.version}.apk releases/edh-hub.apk"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          { "path": "releases/edh-hub.apk", "name": "edh-hub-${nextRelease.version}.apk", "label": "Android app (APK)" }
+        ]
+      }
+    ]
+  ]
+}

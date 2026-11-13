@@ -44,17 +44,20 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - "Reset players" tile: every seat gets a fresh player (one commander, no art, distinct random colors, counters tax / storm / poison + mana) and the game resets. These are also the defaults for new installs.
 - Storm stays usable while the mana pool shade is open; the pool's +/− have no button background.
 
-## Hosting
+## Hosting and releases
 
-- Repo: https://github.com/Manwe-777/edh-hub (private).
-- `.github/workflows/deploy.yml` builds on every push to `main`; the Pages deploy job runs only when the repository variable `PAGES_ENABLED` is `true`. To go live: make the repo public (or use a plan with private Pages), Settings → Pages → Source: GitHub Actions, then `gh variable set PAGES_ENABLED --body true` and re-run the workflow. The site is served from `https://manwe-777.github.io/edh-hub/` (Vite `base: './'` makes the sub-path work).
+- Repo: https://github.com/Manwe-777/edh-hub (public). Site: https://manwe-777.github.io/edh-hub/ (`deploy.yml`, every push to `main`).
+- `release.yml` runs semantic-release on every push to `main`: `feat:` / `fix:` commits create a version tag and a GitHub release with the signed APK (`edh-hub-<version>.apk`). The version lives in the tags; `package.json` stays at 0.1.0.
+- CI signing secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`.
+- Android `versionCode` = major*10000 + minor*100 + patch, passed as `-PappVersion`.
+- Commit messages follow Conventional Commits and carry no assistant attribution trailers.
 
 ## Android
 
 - Capacitor 8 wrapper in `android/` (app id `com.manuh.edhhub`, portrait, full-screen with system bars hidden, dark launch screen, launcher icons from `public/icon.svg`).
 - Keep awake uses a native `KeepAwake` plugin (window keep-screen-on flag) in the APK; the web build uses the Wake Lock API and its service worker.
-- `npm run apk` builds a debug APK into `releases/` (Gradle runs on Temurin JDK 21 from mise; JDK 27 is too new for Gradle 8.14).
-- `npm run apk:release` builds the shareable signed APK `releases/edh-hub-<version>.apk`. The release key is `~/.android/edh-hub-release.jks`, with its passwords in `android/keystore.properties` (not committed). Back both up: updates only install over builds signed with the same key. Bump `versionCode`/`versionName` in `android/app/build.gradle` and `version` in `package.json` for each shared release.
+- `npm run apk` / `npm run apk:release` run `scripts/build-apk.sh` (Gradle on JDK 21: `JAVA_HOME` if set, else mise's Temurin 21; JDK 27 is too new for Gradle 8.14).
+- `npm run apk:release` builds the signed APK locally. The release key is `~/.android/edh-hub-release.jks`, with its passwords in `android/keystore.properties` (not committed). Back both up: updates only install over builds signed with the same key.
 - Install: `adb install -r releases/edh-hub-<version>-debug.apk`. Debug builds are signed with this machine's debug key, so updates install over each other only when built here.
 
 ## Next
