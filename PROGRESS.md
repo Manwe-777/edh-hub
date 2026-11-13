@@ -44,6 +44,13 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - "Reset players" tile: every seat gets a fresh player (one commander, no art, distinct random colors, counters tax / storm / poison + mana) and the game resets. These are also the defaults for new installs.
 - Storm stays usable while the mana pool shade is open; the pool's +/− have no button background.
 
+## Android
+
+- Capacitor 8 wrapper in `android/` (app id `com.manuh.edhhub`, portrait, full-screen with system bars hidden, dark launch screen, launcher icons from `public/icon.svg`).
+- Keep awake uses a native `KeepAwake` plugin (window keep-screen-on flag) in the APK; the web build uses the Wake Lock API and its service worker.
+- `npm run apk` builds a debug APK into `releases/` (Gradle runs on Temurin JDK 21 from mise; JDK 27 is too new for Gradle 8.14).
+- Install: `adb install -r releases/edh-hub-<version>-debug.apk`. Debug builds are signed with this machine's debug key, so updates install over each other only when built here.
+
 ## Next
 
 - [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock

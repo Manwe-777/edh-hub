@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { usePresence } from './usePresence';
 import { LAYOUTS } from './layouts';
 import { mutate, useStore } from './store';
@@ -25,8 +26,14 @@ function useViewport() {
   return v;
 }
 
+const KeepAwake = registerPlugin<{ set(o: { on: boolean }): Promise<void> }>('KeepAwake');
+
 function useWakeLock(on: boolean) {
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      KeepAwake.set({ on }).catch(() => {});
+      return;
+    }
     if (!on || !('wakeLock' in navigator)) return;
     let lock: WakeLockSentinel | null = null;
     let dead = false;

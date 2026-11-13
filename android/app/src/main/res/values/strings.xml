@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">EDH Hub</string>
+    <string name="title_activity_main">EDH Hub</string>
+    <string name="package_name">com.manuh.edhhub</string>
+    <string name="custom_url_scheme">com.manuh.edhhub</string>
+</resources>
