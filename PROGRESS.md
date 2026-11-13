@@ -49,6 +49,7 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - Capacitor 8 wrapper in `android/` (app id `com.manuh.edhhub`, portrait, full-screen with system bars hidden, dark launch screen, launcher icons from `public/icon.svg`).
 - Keep awake uses a native `KeepAwake` plugin (window keep-screen-on flag) in the APK; the web build uses the Wake Lock API and its service worker.
 - `npm run apk` builds a debug APK into `releases/` (Gradle runs on Temurin JDK 21 from mise; JDK 27 is too new for Gradle 8.14).
+- `npm run apk:release` builds the shareable signed APK `releases/edh-hub-<version>.apk`. The release key is `~/.android/edh-hub-release.jks`, with its passwords in `android/keystore.properties` (not committed). Back both up: updates only install over builds signed with the same key. Bump `versionCode`/`versionName` in `android/app/build.gradle` and `version` in `package.json` for each shared release.
 - Install: `adb install -r releases/edh-hub-<version>-debug.apk`. Debug builds are signed with this machine's debug key, so updates install over each other only when built here.
 
 ## Next
