@@ -1,0 +1,29 @@
+# EDH Hub — progress
+
+Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
+
+## Run
+
+- `npm run dev` → http://localhost:5180 (also on the LAN, so a phone on the same Wi-Fi can open it)
+- Desktop preview in a phone frame: http://localhost:5180/?phone (or `?phone=360x780`)
+- `npm run build` → `dist/` (PWA with offline service worker)
+
+## Done
+
+- [x] Vite + React + TS scaffold, mana-font bundled, vite-plugin-pwa (offline precache, Scryfall art runtime cache)
+- [x] Layouts for 2–6 players, seats clockwise, each cell rotated to its table edge; center button at the junction
+- [x] Life: tap halves ±1, hold ±10 with repeat; running change bubble
+- [x] Counter bar: poison / experience (tap +1, hold −1), monarch / initiative (single holder), mana pool (tap toggle, hold reset)
+- [x] Mana pool overlay: W U B R G C with + / − per color, grid shape picked to keep buttons as large as possible
+- [x] Swipe up → table-wide commander damage view for that player; 1 or 2 commanders per source; damage moves life
+- [x] Loss: life ≤ 0, poison ≥ 10, 21 from one commander → dimmed cell + rotating defeat lines (shuffle bag, no duplicates on screen)
+- [x] Swipe down → player options (name, color, commander count, Scryfall art picker with artist credit, counters from fixed list)
+- [x] Center menu: roll high (ties re-roll), undo (20 steps), reset, starting life, players, coin/d6/d20, keep awake, fullscreen
+- [x] State saved synchronously on every change; reload restores everything; unreadable save backed up and a fresh game started
+- [x] GitHub Pages deploy workflow (.github/workflows/deploy.yml)
+
+## Next
+
+- [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock
+- [ ] Player options sheet layout for sideways seats (uses a narrow column today)
+- [ ] Capacitor wrapper + debug APK over adb
