@@ -380,10 +380,9 @@ function RollResult({ game, p, font }: { game: Game; p: Player; font: number }) 
     >
       {done && win && <div className="winner-fx" />}
       <div className={`roll-val${done ? ' pop-in' : ''}`} style={{ fontSize: font * 0.8 }}>
-        <i className="ms ms-ability-d20" /> {value}
+        {value}
       </div>
       <div className="roll-hist">{done && mine.length > 1 ? `tie-break: ${mine.join(' → ')}` : '\u00a0'}</div>
-      <div className="roll-tag">{done && win ? 'Highest roll — you start!' : '\u00a0'}</div>
     </Press>
   );
 }

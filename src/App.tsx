@@ -98,9 +98,6 @@ export default function App() {
           game={game}
           id={optId}
           leaving={optionsP.leaving}
-          dir={layout.seats[optId].dir}
-          vw={vw}
-          vh={vh}
           onClose={() => setOptions(null)}
         />
       )}

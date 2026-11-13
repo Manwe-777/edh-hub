@@ -28,14 +28,15 @@ export const COUNTER_LABEL: Record<CounterKey, string> = {
 
 /** Bright, slightly pastel cell colors; text and icons on them are black. */
 export const PALETTE = [
-  '#8ab8f0', '#f4978e', '#8fd9a8', '#c3a6ef', '#f7c77e', '#7fd6cf',
-  '#f4a6cb', '#c9d1db', '#e3cf9f', '#a9adf5',
+  '#4f8fe8', '#ec5f57', '#34b46e', '#9a6ff0', '#f0922e', '#22aea4',
+  '#e7609f', '#7d8796', '#c9a043', '#6f78ee',
 ];
 /** First palette, mapped index-for-index onto the current one when loading old saves. */
-const OLD_PALETTE = [
-  '#2f6fb3', '#b8423a', '#2f8f55', '#7b4bb0', '#c27c1a', '#1f8f8a',
-  '#b2457f', '#5a6472', '#8a6d3b', '#3c3f99',
+const OLD_PALETTES = [
+  ['#2f6fb3', '#b8423a', '#2f8f55', '#7b4bb0', '#c27c1a', '#1f8f8a', '#b2457f', '#5a6472', '#8a6d3b', '#3c3f99'],
+  ['#8ab8f0', '#f4978e', '#8fd9a8', '#c3a6ef', '#f7c77e', '#7fd6cf', '#f4a6cb', '#c9d1db', '#e3cf9f', '#a9adf5'],
 ];
+const paletteIndex = (c: string) => Math.max(...OLD_PALETTES.map((pal) => pal.indexOf(c)));
 
 export interface Commander {
   name: string;
@@ -211,7 +212,7 @@ export function migrate(raw: unknown): Game {
   const out: Game = { ...base, ...g };
   out.players = g.players.map((p, i) => {
     const np = newPlayer(i, g.startingLife ?? 40);
-    const old = OLD_PALETTE.indexOf(p.color);
+    const old = paletteIndex(p.color);
     return {
       ...np,
       ...p,

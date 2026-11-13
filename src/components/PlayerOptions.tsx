@@ -1,22 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ALL_COUNTERS, COUNTER_LABEL, MAX_VISIBLE_COUNTERS, PALETTE,
-  type CounterKey, type Dir, type Game,
+  type CounterKey, type Game,
 } from '../game';
 import { mutate } from '../store';
 import { artworks, autocomplete, type ArtOption } from '../scryfall';
-import { Rotated } from './Rotated';
-import { isSideways } from '../layouts';
-import { CounterIcon } from './icons';
+import { CounterIcon, UiIcon } from './icons';
 
-/** Full-screen options panel, drawn in the player's own orientation. */
-export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: number; vh: number; leaving: boolean; onClose: () => void }) {
-  const { game, id, dir, vw, vh, leaving, onClose } = props;
+/** Full-screen options panel, always upright so the on-screen keyboard matches it. */
+export function PlayerOptions(props: { game: Game; id: number; leaving: boolean; onClose: () => void }) {
+  const { game, id, leaving, onClose } = props;
   const p = game.players[id];
   const set = (fn: (g: Game) => void) => mutate(fn, false);
-  // Ignore the click that ends the swipe which opened this panel.
-  const openedAt = useRef(Date.now());
-  const backdrop = () => Date.now() - openedAt.current > 400 && onClose();
 
   const toggleCounter = (k: CounterKey) =>
     set((g) => {
@@ -27,71 +22,63 @@ export function PlayerOptions(props: { game: Game; id: number; dir: Dir; vw: num
     });
 
   return (
-    <div className={`modal-backdrop${leaving ? ' leaving' : ''}`} onClick={backdrop}>
-      <Rotated w={vw} h={vh} dir={dir} className="sheet-wrap">
-        <div className={`sheet${isSideways(dir) ? ' wide' : ''}`} onClick={(e) => e.stopPropagation()}>
-          <div className="sheet-head">
-            <h2>Player options</h2>
-            <button className="btn" onClick={onClose}>Done</button>
-          </div>
+    <div className={`screen${leaving ? ' leaving' : ''}`}>
+      <div className="screen-body">
+        <header className="screen-head">
+          <span className="head-dot" style={{ background: p.color }} />
+          <input
+            className="name-input"
+            value={p.name}
+            maxLength={24}
+            aria-label="Name"
+            onChange={(e) => set((g) => void (g.players[id].name = e.target.value))}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+          />
+          <button className="icon-btn" onClick={onClose} aria-label="Close">
+            <UiIcon name="close" />
+          </button>
+        </header>
 
-          <div className="sheet-cols">
-          <div>
-          <label className="field">
-            <span>Name</span>
-            <input
-              value={p.name}
-              maxLength={24}
-              onChange={(e) => set((g) => void (g.players[id].name = e.target.value))}
-            />
-          </label>
+        <section className="group">
+          <h3><UiIcon name="palette" size={18} /> Color</h3>
+          <div className="swatches">
+            {PALETTE.map((c) => (
+              <button
+                key={c}
+                className={`swatch${p.color === c ? ' on' : ''}`}
+                style={{ background: c }}
+                aria-label={c}
+                onClick={() => set((g) => void (g.players[id].color = c))}
+              />
+            ))}
+          </div>
+        </section>
 
-          <div className="field">
-            <span>Color</span>
-            <div className="swatches">
-              {PALETTE.map((c) => (
-                <button
-                  key={c}
-                  className={`swatch${p.color === c ? ' on' : ''}`}
-                  style={{ background: c }}
-                  aria-label={c}
-                  onClick={() => set((g) => void (g.players[id].color = c))}
-                />
-              ))}
-            </div>
+        <section className="group">
+          <h3><UiIcon name="user" size={18} /> Commanders</h3>
+          <div className="segmented" style={{ ['--n' as string]: 2 }}>
+            {([1, 2] as const).map((n) => (
+              <button key={n} className={p.commanderCount === n ? 'on' : ''} onClick={() => set((g) => void (g.players[id].commanderCount = n))}>
+                {n === 1 ? 'One' : 'Two (partners)'}
+              </button>
+            ))}
           </div>
-
-          <div className="field">
-            <span>Commanders</span>
-            <div className="seg">
-              {([1, 2] as const).map((n) => (
-                <button key={n} className={`btn${p.commanderCount === n ? ' on' : ''}`} onClick={() => set((g) => void (g.players[id].commanderCount = n))}>
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="field">
-            <span>Counters (up to {MAX_VISIBLE_COUNTERS})</span>
-            <div className="counter-pick">
-              {ALL_COUNTERS.map((k) => (
-                <button key={k} className={`btn chip${p.visibleCounters.includes(k) ? ' on' : ''}`} onClick={() => toggleCounter(k)}>
-                  <CounterIcon k={k} /> {COUNTER_LABEL[k]}
-                </button>
-              ))}
-            </div>
-          </div>
-          </div>
-          <div>
           {Array.from({ length: p.commanderCount }, (_, c) => (
             <CommanderPicker key={c} game={game} id={id} slot={c as 0 | 1} />
           ))}
+        </section>
 
+        <section className="group">
+          <h3>Counters <small>up to {MAX_VISIBLE_COUNTERS}</small></h3>
+          <div className="chips">
+            {ALL_COUNTERS.map((k) => (
+              <button key={k} className={`chip${p.visibleCounters.includes(k) ? ' on' : ''}`} onClick={() => toggleCounter(k)}>
+                <CounterIcon k={k} /> {COUNTER_LABEL[k]}
+              </button>
+            ))}
           </div>
-          </div>
-        </div>
-      </Rotated>
+        </section>
+      </div>
     </div>
   );
 }
@@ -136,21 +123,23 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
   };
 
   return (
-    <div className="field cmdr">
-      <span>Commander {slot + 1}</span>
+    <div className="cmdr">
       <div className="cmdr-current">
-        {cmd.art && <img src={cmd.art} alt="" />}
+        {cmd.art ? <img src={cmd.art} alt="" /> : <div className="cmdr-ph" />}
         <div>
-          <div>{cmd.name || 'None'}</div>
-          {cmd.artist && <div className="muted">Art by {cmd.artist}</div>}
+          <div>{cmd.name || `Commander ${slot + 1}`}</div>
+          <div className="muted">{cmd.artist ? `Art by ${cmd.artist}` : 'No art — uses player color'}</div>
         </div>
         {cmd.name && (
-          <button className="btn" onClick={() => mutate((g) => void (g.players[id].commanders[slot] = { name: '', art: null, artist: null }), false)}>
-            Clear
+          <button className="icon-btn small" aria-label="Clear" onClick={() => mutate((g) => void (g.players[id].commanders[slot] = { name: '', art: null, artist: null }), false)}>
+            <UiIcon name="close" size={18} />
           </button>
         )}
       </div>
-      <input placeholder="Search Scryfall…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <label className="search">
+        <UiIcon name="search" size={18} />
+        <input placeholder="Search Scryfall…" value={q} onChange={(e) => setQ(e.target.value)} />
+      </label>
       {names.length > 0 && (
         <ul className="suggest">
           {names.map((n) => (

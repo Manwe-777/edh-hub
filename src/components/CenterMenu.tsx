@@ -1,81 +1,55 @@
 import { useState } from 'react';
 import { type Game, resetGame, rollDie, rollHigh } from '../game';
 import { mutate, undo, useStore } from '../store';
+import { UiIcon } from './icons';
 
 const LIFE_PRESETS = [20, 30, 40];
+const PLAYER_COUNTS = [2, 3, 4, 5, 6];
 
 export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: boolean; onClose: () => void }) {
   const { undo: undoStack } = useStore();
-  const [confirmReset, setConfirmReset] = useState(false);
   const [custom, setCustom] = useState('');
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{ text: string; n: number } | null>(null);
+  const isCustom = !LIFE_PRESETS.includes(game.startingLife);
 
-  const close = (fn: () => void) => () => {
+  const andClose = (fn: () => void) => () => {
     fn();
     onClose();
   };
+  const quick = (text: string) => setResult((r) => ({ text, n: (r?.n ?? 0) + 1 }));
 
   return (
-    <div className={`modal-backdrop${leaving ? ' leaving' : ''}`} onClick={onClose}>
-      <div className="menu" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-head">
-          <h2>Menu</h2>
-          <button className="btn" onClick={onClose}>Close</button>
-        </div>
-
-        <div className="menu-grid">
-          <button className="btn big" onClick={close(() => mutate((g) => rollHigh(g), false))}>
-            <i className="ms ms-ability-d20" /> Roll high
+    <div className={`screen${leaving ? ' leaving' : ''}`}>
+      <div className="screen-body">
+        <header className="screen-head">
+          <h2>Game</h2>
+          <button className="icon-btn" onClick={onClose} aria-label="Close">
+            <UiIcon name="close" />
           </button>
-          <button className="btn big" disabled={!undoStack.length} onClick={() => undo()}>
-            ↶ Undo
+        </header>
+
+        <div className="tiles">
+          <button className="tile" onClick={andClose(() => mutate((g) => rollHigh(g), false))}>
+            <i className="ms ms-ability-d20" />
+            <span>Roll high</span>
+          </button>
+          <button className="tile" disabled={!undoStack.length} onClick={() => undo()}>
+            <UiIcon name="undo" size={26} />
+            <span>Undo</span>
+          </button>
+          <button className="tile danger" onClick={andClose(() => mutate((g) => resetGame(g)))}>
+            <UiIcon name="reset" size={26} />
+            <span>Reset all</span>
           </button>
         </div>
 
-        <div className="field">
-          <span>Reset game</span>
-          {confirmReset ? (
-            <div className="seg">
-              <button className="btn danger" onClick={close(() => mutate((g) => resetGame(g)))}>
-                Reset to {game.startingLife}
-              </button>
-              <button className="btn" onClick={() => setConfirmReset(false)}>Cancel</button>
-            </div>
-          ) : (
-            <button className="btn" onClick={() => setConfirmReset(true)}>Reset all life, damage and counters…</button>
-          )}
-        </div>
-
-        <div className="field">
-          <span>Starting life (applies on reset)</span>
-          <div className="seg">
-            {LIFE_PRESETS.map((n) => (
-              <button key={n} className={`btn${game.startingLife === n ? ' on' : ''}`} onClick={() => mutate((g) => void (g.startingLife = n), false)}>
-                {n}
-              </button>
-            ))}
-            <input
-              className="num"
-              inputMode="numeric"
-              placeholder="Custom"
-              value={custom}
-              onChange={(e) => setCustom(e.target.value.replace(/\D/g, ''))}
-              onBlur={() => {
-                const n = parseInt(custom, 10);
-                if (n > 0 && n < 1000) mutate((g) => void (g.startingLife = n), false);
-                setCustom('');
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="field">
-          <span>Players</span>
-          <div className="seg">
-            {[2, 3, 4, 5, 6].map((n) => (
+        <section className="group">
+          <h3><UiIcon name="users" size={18} /> Players</h3>
+          <div className="segmented" style={{ ['--n' as string]: PLAYER_COUNTS.length }}>
+            {PLAYER_COUNTS.map((n) => (
               <button
                 key={n}
-                className={`btn${game.playerCount === n ? ' on' : ''}`}
+                className={game.playerCount === n ? 'on' : ''}
                 onClick={() => mutate((g) => {
                   g.playerCount = n;
                   if (g.view.kind === 'cmd' && g.view.target >= n) g.view = { kind: 'normal' };
@@ -86,32 +60,58 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
               </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="field">
-          <span>Quick roll</span>
-          <div className="seg">
-            <button className="btn" onClick={() => setResult(`Coin: ${rollDie(2) === 1 ? 'Heads' : 'Tails'}`)}>Coin</button>
-            <button className="btn" onClick={() => setResult(`d6: ${rollDie(6)}`)}>d6</button>
-            <button className="btn" onClick={() => setResult(`d20: ${rollDie(20)}`)}>d20</button>
-            {result && <span className="result" key={result + Math.random()}>{result}</span>}
+        <section className="group">
+          <h3><UiIcon name="heart" size={18} /> Starting life <small>applies on reset</small></h3>
+          <div className="segmented" style={{ ['--n' as string]: LIFE_PRESETS.length + 1 }}>
+            {LIFE_PRESETS.map((n) => (
+              <button key={n} className={game.startingLife === n ? 'on' : ''} onClick={() => mutate((g) => void (g.startingLife = n), false)}>
+                {n}
+              </button>
+            ))}
+            <input
+              className={isCustom && !custom ? 'on' : ''}
+              inputMode="numeric"
+              placeholder={isCustom ? String(game.startingLife) : 'Other'}
+              value={custom}
+              onChange={(e) => setCustom(e.target.value.replace(/\D/g, '').slice(0, 3))}
+              onBlur={() => {
+                const n = parseInt(custom, 10);
+                if (n > 0) mutate((g) => void (g.startingLife = n), false);
+                setCustom('');
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            />
           </div>
-        </div>
+        </section>
 
-        <div className="field">
-          <span>Screen</span>
-          <div className="seg">
-            <button className={`btn${game.keepAwake ? ' on' : ''}`} onClick={() => mutate((g) => void (g.keepAwake = !g.keepAwake), false)}>
-              Keep awake: {game.keepAwake ? 'on' : 'off'}
-            </button>
-            <button
-              className="btn"
-              onClick={() => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.())}
-            >
-              Fullscreen
-            </button>
+        <section className="group">
+          <h3>
+            <UiIcon name="dice" size={18} /> Quick roll
+            {result && <span className="quick-result" key={result.n}>{result.text}</span>}
+          </h3>
+          <div className="segmented plain" style={{ ['--n' as string]: 3 }}>
+            <button onClick={() => quick(rollDie(2) === 1 ? 'Heads' : 'Tails')}>Coin</button>
+            <button onClick={() => quick(`d6 · ${rollDie(6)}`)}>d6</button>
+            <button onClick={() => quick(`d20 · ${rollDie(20)}`)}>d20</button>
           </div>
-        </div>
+        </section>
+
+        <section className="group list">
+          <button className="row" onClick={() => mutate((g) => void (g.keepAwake = !g.keepAwake), false)}>
+            <UiIcon name="sun" size={20} />
+            <span>Keep screen awake</span>
+            <span className={`switch${game.keepAwake ? ' on' : ''}`} />
+          </button>
+          <button
+            className="row"
+            onClick={() => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.())}
+          >
+            <UiIcon name="expand" size={20} />
+            <span>Fullscreen</span>
+          </button>
+        </section>
       </div>
     </div>
   );

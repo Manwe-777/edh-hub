@@ -33,6 +33,14 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - [x] Dead: no skull icon, no life total; art or color stays under a pulsing blood-red glow
 - [x] Roll high: numbers flicker and slow down for ~2 s, then the winner gets a turning rainbow background
 
+## Visual pass (feedback 2)
+
+- Cell text and icons are white everywhere; palette moved to brighter mid-tones (old pastel/dark colors migrate).
+- Mana pool pips and +/− buttons have no outlines.
+- Menu and player options are full-screen upright panels: slide up with fade, X close top right, equal-size tiles, segmented controls, list rows with a switch, line icons, no borders.
+- Reset is a single "Reset all" tile (undoable).
+- Roll result shows only the number; the winner's number pulses.
+
 ## Next
 
 - [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock
