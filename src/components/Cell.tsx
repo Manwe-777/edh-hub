@@ -297,7 +297,7 @@ function DamageControls(props: {
         </Press>
         <div className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
           <div className={`life dmg pop-in${dmg[0] >= 21 ? ' lethal' : ''}`} style={{ fontSize: font }}>
-            <i className="ms ms-commander" />{dmg[0]}
+            {dmg[0]}
           </div>
         </div>
       </>

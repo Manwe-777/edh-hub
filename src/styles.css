@@ -139,8 +139,6 @@ body {
   font-variant-numeric: tabular-nums;
   letter-spacing: -.02em;
 }
-.life.dmg { display: flex; align-items: center; gap: .1em; }
-.life.dmg .ms { font-size: .42em; opacity: .7; }
 .delta {
   position: absolute;
   left: 100%;
