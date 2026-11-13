@@ -64,8 +64,9 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
 
   const barH = inCmd ? 0 : Math.round(Math.max(42, Math.min(56, lh * 0.2)));
   const bodyH = lh - barH - NAME_H;
-  const tallyItems = game.cmdTally && !inCmd && !game.roll ? tallySources(game, p) : [];
-  const tally = tallyItems.length ? tallyLayout(tallyItems.length, bodyH - 8) : null;
+  const tallyGroups = game.cmdTally && !inCmd && !game.roll ? tallySources(game, p) : [];
+  // The strip also uses the name row (the name re-centers in the space left of it).
+  const tally = tallyGroups.length ? tallyLayout(tallyGroups, lh - barH - TALLY_TOP - 4, lw) : null;
   const bodyW = lw - (tally?.width ?? 0);
   const lifeFont = Math.max(28, Math.min(bodyW * 0.28, bodyH * 0.66));
   const pad = { top: NAME_H, bottom: barH };
@@ -122,16 +123,16 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
         <div className="cell-layer" style={tally ? { right: tally.width } : undefined}>{body}</div>
         {tally && (
           <Tally
-            items={tallyItems}
+            groups={tallyGroups}
             layout={tally}
-            pad={pad}
+            bottom={barH}
             rotation={rotation}
             onTap={() => mutate((g) => void (g.view = { kind: 'cmd', target: p.id }), false)}
             swipe={swipe}
           />
         )}
         {mana.mounted && <ManaOverlay p={p} lw={lw} pad={pad} leaving={mana.leaving} />}
-        <div className="cell-name" style={{ height: NAME_H }}>
+        <div className="cell-name" style={{ height: NAME_H, paddingRight: tally?.width }}>
           {game.monarch === p.id && <span className="name-token"><CounterIcon k="monarch" /></span>}
           {game.initiative === p.id && <span className="name-token"><CounterIcon k="initiative" /></span>}
           <span className="name-text">{p.name}</span>
@@ -144,55 +145,63 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
   );
 }
 
-interface TallyItem {
+interface TallySquare {
   key: string;
   color: string;
   art: string | null;
   dmg: number;
 }
 
-/** One square per commander of every other active player, with the damage it dealt to `p`. */
-function tallySources(game: Game, p: Player): TallyItem[] {
-  const out: TallyItem[] = [];
+/** Per other active player, one square per commander with the damage it dealt to `p`. */
+function tallySources(game: Game, p: Player): TallySquare[][] {
+  const out: TallySquare[][] = [];
   for (let i = 0; i < game.playerCount; i++) {
     if (i === p.id) continue;
     const s = game.players[i];
-    for (let c = 0; c < s.commanderCount; c++) {
-      out.push({
+    out.push(
+      Array.from({ length: s.commanderCount }, (_, c) => ({
         key: `${i}-${c}`,
         color: s.color,
         art: s.commanders[c].art,
         dmg: p.cmdDamage[i][c],
-      });
-    }
+      })),
+    );
   }
   return out;
 }
 
-const TALLY_GAP = 4;
+const TALLY_GAP = 5; // between opponents
+const TALLY_INNER = 2; // between partner squares
 const TALLY_PAD = 6;
+const TALLY_TOP = 4;
 
-/** Fewest columns that keep the squares at a readable size within the available height. */
-function tallyLayout(n: number, h: number) {
+/**
+ * Opponents are tiles (a partner pair stays side by side in one tile) flowing
+ * into 1–3 columns; picks the layout with the biggest squares that keeps the
+ * strip within ~40% of the cell width.
+ */
+function tallyLayout(groups: TallySquare[][], h: number, lw: number) {
+  const n = groups.length;
+  const slots = Math.max(...groups.map((g) => g.length));
+  const maxW = lw * 0.4;
   let best = { cols: 1, size: 0 };
   for (let cols = 1; cols <= 3; cols++) {
     const rows = Math.ceil(n / cols);
-    const size = Math.floor(Math.min(38, (h - TALLY_GAP * (rows - 1)) / rows));
+    const byH = (h - TALLY_GAP * (rows - 1)) / rows;
+    const byW = (maxW - TALLY_PAD * 2 - (cols - 1) * TALLY_GAP - cols * (slots - 1) * TALLY_INNER) / (cols * slots);
+    const size = Math.floor(Math.min(36, byH, byW));
     if (size > best.size) best = { cols, size };
-    if (size >= 28) {
-      best = { cols, size };
-      break;
-    }
   }
-  const size = Math.max(18, best.size);
-  return { cols: best.cols, size, width: best.cols * size + (best.cols - 1) * TALLY_GAP + TALLY_PAD * 2 };
+  const size = Math.max(16, best.size);
+  const tileW = slots * size + (slots - 1) * TALLY_INNER;
+  return { cols: best.cols, size, tileW, width: best.cols * tileW + (best.cols - 1) * TALLY_GAP + TALLY_PAD * 2 };
 }
 
 function Tally(props: {
-  items: TallyItem[]; layout: ReturnType<typeof tallyLayout>; pad: Pad; rotation: number;
+  groups: TallySquare[][]; layout: ReturnType<typeof tallyLayout>; bottom: number; rotation: number;
   onTap: () => void; swipe: (d: 'up' | 'down') => void;
 }) {
-  const { items, layout, pad, rotation, onTap, swipe } = props;
+  const { groups, layout, bottom, rotation, onTap, swipe } = props;
   return (
     <Press
       className="tally"
@@ -201,22 +210,30 @@ function Tally(props: {
       onSwipe={swipe}
       label="Commander damage taken"
       style={{
-        top: pad.top,
-        bottom: pad.bottom,
+        top: TALLY_TOP,
+        bottom,
         width: layout.width,
-        gridTemplateColumns: `repeat(${layout.cols}, ${layout.size}px)`,
+        gridTemplateColumns: `repeat(${layout.cols}, ${layout.tileW}px)`,
         gridAutoRows: layout.size,
         gap: TALLY_GAP,
         padding: `0 ${TALLY_PAD}px`,
       }}
     >
-      {items.map((t) => (
-        <div
-          key={t.key}
-          className={`tally-sq${t.dmg === 0 ? ' zero' : ''}${t.dmg >= 21 ? ' lethal' : ''}`}
-          style={{ background: t.art ? `center 30% / cover url("${t.art}")` : t.color, fontSize: Math.max(11, layout.size * 0.42) }}
-        >
-          <span>{t.dmg}</span>
+      {groups.map((g) => (
+        <div key={g[0].key} className="tally-tile" style={{ gap: TALLY_INNER }}>
+          {g.map((t) => (
+            <div
+              key={t.key}
+              className={`tally-sq${t.dmg === 0 ? ' zero' : ''}${t.dmg >= 21 ? ' lethal' : ''}`}
+              style={{
+                width: layout.size,
+                background: t.art ? `center 30% / cover url("${t.art}")` : t.color,
+                fontSize: Math.max(10, layout.size * 0.44),
+              }}
+            >
+              <span>{t.dmg}</span>
+            </div>
+          ))}
         </div>
       ))}
     </Press>

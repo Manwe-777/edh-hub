@@ -238,8 +238,10 @@ body {
   justify-content: center;
   touch-action: none;
 }
+.tally-tile { display: flex; justify-content: center; }
 .tally-sq {
   position: relative;
+  flex: none;
   border-radius: 8px;
   overflow: hidden;
   display: grid;
