@@ -294,8 +294,13 @@ body {
 
 /* winner: a slowly turning rainbow behind the result */
 .winner-fx {
+  /* a square far larger than any cell's diagonal, centered, so rotation never exposes a corner */
   position: absolute;
-  inset: -60%;
+  left: 50%;
+  top: 50%;
+  width: 200vmax;
+  height: 200vmax;
+  margin: -100vmax 0 0 -100vmax;
   z-index: -1;
   background: conic-gradient(#ff8a8a, #ffd36e, #8be08f, #7cc4ff, #c9a0ff, #ff9fd6, #ff8a8a);
   animation: winspin 4s linear infinite, fadein .4s ease-out;
