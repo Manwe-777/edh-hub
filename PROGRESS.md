@@ -30,7 +30,7 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - [x] +/− halves cover the full cell height; press highlight fades out quickly (~160 ms)
 - [x] Mana pool: WUBRG only, no "x"; full-cell shade slides down from the top and back up; only the mana icon stays tappable
 - [x] Swipe panels: background fades to solid, rows slide in from alternating sides; damage controls slide in from the sides
-- [x] Dead: no skull icon, no life total, blood-red pulsing vignette background
+- [x] Dead: no skull icon, no life total; art or color stays under a pulsing blood-red glow
 - [x] Roll high: numbers flicker and slow down for ~2 s, then the winner gets a turning rainbow background
 
 ## Next

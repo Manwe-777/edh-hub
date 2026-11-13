@@ -59,18 +59,23 @@ body {
 .bg-art { position: absolute; top: 0; bottom: 0; background-size: cover; background-position: center 30%; }
 .cell.has-art .cell-bg::after { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, .3); }
 
-/* Dead: blood-red, darker in the middle, bright at the edges, slowly pulsing. */
-.cell.lost .cell-bg {
-  background: radial-gradient(ellipse at center, #2a0305 0%, #4d070b 40%, #8c0d14 75%, #c0141d 100%);
-}
+/* Dead: the player's art or color stays, under a blood-red glow that's
+   darker in the middle (for the white text) and bright at the edges. */
 .cell.lost .cell-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 45%, rgba(220, 20, 30, .55) 100%);
+  background: radial-gradient(ellipse at center, rgba(45, 0, 4, .6) 0%, rgba(90, 5, 12, .62) 45%, rgba(200, 15, 25, .85) 100%);
+}
+.cell.lost .cell-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(235, 25, 35, .6) 100%);
   animation: bleed 2.4s ease-in-out infinite;
 }
-@keyframes bleed { 50% { opacity: .35; } }
+@keyframes bleed { 50% { opacity: .3; } }
 
 .cell.target .cell-inner::after {
   content: '';

@@ -103,7 +103,8 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
   const arts = p.commanders.slice(0, p.commanderCount).map((c) => c.art).filter(Boolean) as string[];
   const cls = [
     'cell',
-    cause ? 'lost' : arts.length ? 'has-art' : 'plain',
+    arts.length ? 'has-art' : 'plain',
+    cause && 'lost',
     isTarget && 'target',
   ].filter(Boolean).join(' ');
 
@@ -111,7 +112,7 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
     <div className={cls} style={style}>
       <Rotated w={w} h={h} dir={seat.dir} className={`cell-inner${mana.mounted ? ' mana-open' : ''}`} style={{ ['--pc' as string]: p.color }}>
         <div className="cell-bg">
-          {!cause && arts.map((a, i) => (
+          {arts.map((a, i) => (
             <div key={i} className="bg-art" style={{ backgroundImage: `url("${a}")`, width: `${100 / arts.length}%`, left: `${(100 / arts.length) * i}%` }} />
           ))}
         </div>
