@@ -74,6 +74,8 @@ export interface Game {
   playerCount: number;
   startingLife: number;
   keepAwake: boolean;
+  /** Show a per-commander damage tally on the right edge of each cell. */
+  cmdTally: boolean;
   players: Player[];
   monarch: number | null;
   initiative: number | null;
@@ -113,6 +115,7 @@ export function newGame(): Game {
     playerCount: 4,
     startingLife: 40,
     keepAwake: true,
+    cmdTally: false,
     players: Array.from({ length: MAX_PLAYERS }, (_, i) => newPlayer(i, 40)),
     monarch: null,
     initiative: null,

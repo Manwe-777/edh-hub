@@ -64,7 +64,10 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
 
   const barH = inCmd ? 0 : Math.round(Math.max(42, Math.min(56, lh * 0.2)));
   const bodyH = lh - barH - NAME_H;
-  const lifeFont = Math.max(28, Math.min(lw * 0.28, bodyH * 0.66));
+  const tallyItems = game.cmdTally && !inCmd && !game.roll ? tallySources(game, p) : [];
+  const tally = tallyItems.length ? tallyLayout(tallyItems.length, bodyH - 8) : null;
+  const bodyW = lw - (tally?.width ?? 0);
+  const lifeFont = Math.max(28, Math.min(bodyW * 0.28, bodyH * 0.66));
   const pad = { top: NAME_H, bottom: barH };
 
   const swipe = (d: 'up' | 'down') => {
@@ -116,7 +119,17 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
             <div key={i} className="bg-art" style={{ backgroundImage: `url("${a}")`, width: `${100 / arts.length}%`, left: `${(100 / arts.length) * i}%` }} />
           ))}
         </div>
-        <div className="cell-layer">{body}</div>
+        <div className="cell-layer" style={tally ? { right: tally.width } : undefined}>{body}</div>
+        {tally && (
+          <Tally
+            items={tallyItems}
+            layout={tally}
+            pad={pad}
+            rotation={rotation}
+            onTap={() => mutate((g) => void (g.view = { kind: 'cmd', target: p.id }), false)}
+            swipe={swipe}
+          />
+        )}
         {mana.mounted && <ManaOverlay p={p} lw={lw} pad={pad} leaving={mana.leaving} />}
         <div className="cell-name" style={{ height: NAME_H }}>
           {game.monarch === p.id && <span className="name-token"><CounterIcon k="monarch" /></span>}
@@ -128,6 +141,85 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
         {barH > 0 && <CounterBar game={game} p={p} h={barH} lw={lw} manaMode={mana.mounted} />}
       </Rotated>
     </div>
+  );
+}
+
+interface TallyItem {
+  key: string;
+  color: string;
+  art: string | null;
+  dmg: number;
+}
+
+/** One square per commander of every other active player, with the damage it dealt to `p`. */
+function tallySources(game: Game, p: Player): TallyItem[] {
+  const out: TallyItem[] = [];
+  for (let i = 0; i < game.playerCount; i++) {
+    if (i === p.id) continue;
+    const s = game.players[i];
+    for (let c = 0; c < s.commanderCount; c++) {
+      out.push({
+        key: `${i}-${c}`,
+        color: s.color,
+        art: s.commanders[c].art,
+        dmg: p.cmdDamage[i][c],
+      });
+    }
+  }
+  return out;
+}
+
+const TALLY_GAP = 4;
+const TALLY_PAD = 6;
+
+/** Fewest columns that keep the squares at a readable size within the available height. */
+function tallyLayout(n: number, h: number) {
+  let best = { cols: 1, size: 0 };
+  for (let cols = 1; cols <= 3; cols++) {
+    const rows = Math.ceil(n / cols);
+    const size = Math.floor(Math.min(38, (h - TALLY_GAP * (rows - 1)) / rows));
+    if (size > best.size) best = { cols, size };
+    if (size >= 28) {
+      best = { cols, size };
+      break;
+    }
+  }
+  const size = Math.max(18, best.size);
+  return { cols: best.cols, size, width: best.cols * size + (best.cols - 1) * TALLY_GAP + TALLY_PAD * 2 };
+}
+
+function Tally(props: {
+  items: TallyItem[]; layout: ReturnType<typeof tallyLayout>; pad: Pad; rotation: number;
+  onTap: () => void; swipe: (d: 'up' | 'down') => void;
+}) {
+  const { items, layout, pad, rotation, onTap, swipe } = props;
+  return (
+    <Press
+      className="tally"
+      rotation={rotation}
+      onTap={onTap}
+      onSwipe={swipe}
+      label="Commander damage taken"
+      style={{
+        top: pad.top,
+        bottom: pad.bottom,
+        width: layout.width,
+        gridTemplateColumns: `repeat(${layout.cols}, ${layout.size}px)`,
+        gridAutoRows: layout.size,
+        gap: TALLY_GAP,
+        padding: `0 ${TALLY_PAD}px`,
+      }}
+    >
+      {items.map((t) => (
+        <div
+          key={t.key}
+          className={`tally-sq${t.dmg === 0 ? ' zero' : ''}${t.dmg >= 21 ? ' lethal' : ''}`}
+          style={{ background: t.art ? `center 30% / cover url("${t.art}")` : t.color, fontSize: Math.max(11, layout.size * 0.42) }}
+        >
+          <span>{t.dmg}</span>
+        </div>
+      ))}
+    </Press>
   );
 }
 

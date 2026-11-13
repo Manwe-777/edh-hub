@@ -228,6 +228,33 @@ body {
 .mana-count { display: flex; align-items: center; gap: 5px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .mana-count .ms { font-size: .9em; }
 
+/* commander damage tally on the right edge */
+.tally {
+  position: absolute;
+  right: 0;
+  z-index: 3;
+  display: grid;
+  align-content: center;
+  justify-content: center;
+  touch-action: none;
+}
+.tally-sq {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  outline: 1.5px solid color-mix(in srgb, #fff 35%, transparent);
+  outline-offset: -1.5px;
+}
+.tally-sq::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, .32); }
+.tally-sq span { position: relative; }
+.tally-sq.zero span { opacity: .6; }
+.tally-sq.lethal { outline-color: #ffd84d; color: #ffd84d; }
+
 /* counter bar */
 .bar {
   position: absolute;
@@ -495,6 +522,7 @@ input::placeholder { color: var(--muted); }
 .row + .row { box-shadow: 0 -1px 0 var(--surface-2); }
 .row > span:first-of-type { flex: 1; }
 .row:active { background: var(--surface-2); }
+.row-ms { width: 20px; text-align: center; font-size: 18px; }
 .switch { width: 44px; height: 26px; border-radius: 13px; background: var(--surface-2); position: relative; transition: background-color .2s; flex: none; }
 .switch::after {
   content: '';

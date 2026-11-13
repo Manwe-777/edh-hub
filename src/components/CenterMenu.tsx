@@ -104,6 +104,11 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
             <span>Keep screen awake</span>
             <span className={`switch${game.keepAwake ? ' on' : ''}`} />
           </button>
+          <button className="row" onClick={() => mutate((g) => void (g.cmdTally = !g.cmdTally), false)}>
+            <i className="ms ms-commander row-ms" />
+            <span>Commander damage on cells</span>
+            <span className={`switch${game.cmdTally ? ' on' : ''}`} />
+          </button>
           <button
             className="row"
             onClick={() => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.())}
