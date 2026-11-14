@@ -51,6 +51,8 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - CI signing secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`.
 - Android `versionCode` = major*10000 + minor*100 + patch, passed as `-PappVersion`.
 - Commit messages follow Conventional Commits and carry no assistant attribution trailers.
+- Commander search only returns cards that can be a commander (Scryfall `is:commander`), best name match first, most played within each group.
+- Pinned commanders (star): stored per device in `edh-hub/pinned-commanders`, untouched by resets; listed when the search box is empty, shown first with a filled star in results; the current commander has a star too.
 
 ## Android
 

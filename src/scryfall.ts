@@ -13,10 +13,29 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function autocomplete(q: string, signal?: AbortSignal): Promise<string[]> {
+/** Cards that can be a commander (legendary creatures, plus the few cards that say so). */
+export async function searchCommanders(q: string, signal?: AbortSignal): Promise<string[]> {
   if (q.trim().length < 2) return [];
-  const r = await get<{ data: string[] }>(`/cards/autocomplete?q=${encodeURIComponent(q)}`, signal);
-  return r.data.slice(0, 8);
+  const query = encodeURIComponent(`${q.trim()} is:commander`);
+  try {
+    const r = await get<{ data: { name: string }[] }>(`/cards/search?q=${query}&order=edhrec&unique=cards`, signal);
+    // Best name match first (start of name, then start of a word), most played within each group.
+    const needle = q.trim().toLowerCase();
+    const rank = (name: string) => {
+      const n = name.toLowerCase();
+      if (n.startsWith(needle)) return 0;
+      if (n.split(/[\s,'-]+/).some((w) => w.startsWith(needle))) return 1;
+      return n.includes(needle) ? 2 : 3;
+    };
+    return r.data
+      .map((c, i) => ({ name: c.name, i, r: rank(c.name) }))
+      .sort((a, b) => a.r - b.r || a.i - b.i)
+      .slice(0, 10)
+      .map((c) => c.name);
+  } catch (e) {
+    if (e instanceof Error && e.message === 'Scryfall 404') return []; // no matches
+    throw e;
+  }
 }
 
 export interface ArtOption {

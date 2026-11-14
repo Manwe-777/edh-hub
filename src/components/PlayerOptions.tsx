@@ -4,7 +4,8 @@ import {
   type CounterKey, type Game,
 } from '../game';
 import { mutate } from '../store';
-import { artworks, autocomplete, type ArtOption } from '../scryfall';
+import { artworks, searchCommanders, type ArtOption } from '../scryfall';
+import { togglePin, usePins } from '../pins';
 import { CounterIcon, UiIcon } from './icons';
 
 /** Full-screen options panel, always upright so the on-screen keyboard matches it. */
@@ -90,8 +91,9 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
   const [arts, setArts] = useState<ArtOption[] | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const pins = usePins();
 
-  // Debounced autocomplete.
+  // Debounced commander search.
   useEffect(() => {
     if (q.trim().length < 2) {
       setNames([]);
@@ -99,7 +101,8 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
     }
     const ac = new AbortController();
     const t = window.setTimeout(() => {
-      autocomplete(q, ac.signal).then(setNames, (e) => e.name !== 'AbortError' && setErr('Search failed — offline?'));
+      setErr(null);
+      searchCommanders(q, ac.signal).then(setNames, (e) => e.name !== 'AbortError' && setErr('Search failed — offline?'));
     }, 300);
     return () => {
       window.clearTimeout(t);
@@ -130,6 +133,7 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
           <div>{cmd.name || `Commander ${slot + 1}`}</div>
           <div className="muted">{cmd.artist ? `Art by ${cmd.artist}` : 'No art — uses player color'}</div>
         </div>
+        {cmd.name && <PinButton name={cmd.name} pinned={pins.includes(cmd.name)} />}
         {cmd.name && (
           <button className="icon-btn small" aria-label="Clear" onClick={() => mutate((g) => void (g.players[id].commanders[slot] = { name: '', art: null, artist: null }), false)}>
             <UiIcon name="close" size={18} />
@@ -138,14 +142,15 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
       </div>
       <label className="search">
         <UiIcon name="search" size={18} />
-        <input placeholder="Search Scryfall…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input placeholder="Search commanders…" value={q} onChange={(e) => setQ(e.target.value)} />
       </label>
-      {names.length > 0 && (
-        <ul className="suggest">
-          {names.map((n) => (
-            <li key={n}><button onClick={() => pickName(n)}>{n}</button></li>
-          ))}
-        </ul>
+      {q.trim().length >= 2 ? (
+        names.length > 0 && (
+          // Pinned ones first, then Scryfall's order (most played).
+          <NameList names={[...names.filter((n) => pins.includes(n)), ...names.filter((n) => !pins.includes(n))]} pins={pins} onPick={pickName} />
+        )
+      ) : (
+        !picked && pins.length > 0 && <NameList names={pins} pins={pins} onPick={pickName} />
       )}
       {picked && !arts && !err && <div className="muted">Loading artworks for {picked}…</div>}
       {arts && (
@@ -160,5 +165,26 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
       )}
       {err && <div className="err">{err}</div>}
     </div>
+  );
+}
+
+function PinButton({ name, pinned }: { name: string; pinned: boolean }) {
+  return (
+    <button className={`icon-btn small pin${pinned ? ' on' : ''}`} aria-label={pinned ? `Unpin ${name}` : `Pin ${name}`} aria-pressed={pinned} onClick={() => togglePin(name)}>
+      <UiIcon name="star" size={18} filled={pinned} />
+    </button>
+  );
+}
+
+function NameList({ names, pins, onPick }: { names: string[]; pins: string[]; onPick: (n: string) => void }) {
+  return (
+    <ul className="suggest">
+      {names.map((n) => (
+        <li key={n}>
+          <button className="suggest-name" onClick={() => onPick(n)}>{n}</button>
+          <PinButton name={n} pinned={pins.includes(n)} />
+        </li>
+      ))}
+    </ul>
   );
 }

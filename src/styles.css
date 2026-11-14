@@ -607,12 +607,15 @@ input::placeholder { color: var(--muted); }
 .err { color: #ff8a80; font-size: 13px; }
 
 .suggest { list-style: none; margin: 0; padding: 0; border-radius: 12px; overflow: hidden; background: var(--surface-2); }
-.suggest button {
+.suggest .suggest-name {
   display: block; width: 100%; text-align: left; font: inherit; color: var(--text);
   background: none; border: 0; padding: 13px 14px; cursor: pointer;
 }
-.suggest li + li button { box-shadow: 0 -1px 0 var(--surface); }
-.suggest button:active { background: var(--surface); }
+.suggest li { display: flex; align-items: center; padding-right: 6px; }
+.suggest li + li { box-shadow: 0 -1px 0 var(--surface); }
+.suggest .suggest-name { flex: 1; min-width: 0; }
+.pin.on { color: #f2c14e; }
+.suggest .suggest-name:active { background: var(--surface); }
 .arts { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
 .art-opt {
   display: flex; flex-direction: column; gap: 4px; padding: 0; background: none; border: 0;
