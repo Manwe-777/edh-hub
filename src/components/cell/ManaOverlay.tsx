@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { MANA_GAP, POOL_MANA } from '../../constants';
-import type { Pad, Player } from '../../types';
+import type { Player } from '../../game/Player';
+import type { Pad } from '../../types';
 import { cx } from '../../utils/cx';
 import { manaLayout } from '../../utils/manaLayout';
 import { ManaEntry } from './ManaEntry';

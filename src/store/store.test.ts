@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { newGame } from '../game/newGame';
+import { Game } from '../game/Game';
 
 /** The store loads from localStorage when imported, so each test imports a fresh copy. */
 async function freshStore() {
@@ -26,7 +26,7 @@ beforeEach(() => localStorage.clear());
 describe('store', () => {
   it('starts a new game when nothing is saved', async () => {
     const s = await readState(await freshStore());
-    expect(s.game).toEqual(newGame());
+    expect(s.game).toEqual(new Game());
     expect(s.undo).toEqual([]);
   });
 
@@ -72,20 +72,20 @@ describe('store', () => {
   it('undo with nothing to undo does nothing', async () => {
     const mod = await freshStore();
     mod.undo();
-    expect((await readState(mod)).game).toEqual(newGame());
+    expect((await readState(mod)).game).toEqual(new Game());
   });
 
   it('backs up an unreadable save and starts fresh', async () => {
     localStorage.setItem('edh-hub/state', '{not json');
     const s = await readState(await freshStore());
-    expect(s.game).toEqual(newGame());
+    expect(s.game).toEqual(new Game());
     expect(localStorage.getItem('edh-hub/state-backup')).toBe('{not json');
   });
 
   it('drops unreadable undo entries but keeps the game', async () => {
-    const game = newGame();
+    const game = new Game();
     game.players[0].life = 11;
-    localStorage.setItem('edh-hub/state', JSON.stringify({ game, undo: [newGame(), { version: 99 }] }));
+    localStorage.setItem('edh-hub/state', JSON.stringify({ game, undo: [new Game(), { version: 99 }] }));
     const s = await readState(await freshStore());
     expect(s.game.players[0].life).toBe(11);
     expect(s.undo).toHaveLength(1);

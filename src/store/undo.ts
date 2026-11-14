@@ -5,6 +5,7 @@ import { state } from './state';
 export function undo() {
   const stack = state.current.undo;
   if (!stack.length) return;
-  const prev = stack[stack.length - 1];
-  commit({ game: { ...prev, view: { kind: 'normal' }, roll: null }, undo: stack.slice(0, -1) });
+  const prev = stack[stack.length - 1].clone();
+  prev.showTable();
+  commit({ game: prev, undo: stack.slice(0, -1) });
 }

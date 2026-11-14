@@ -1,6 +1,8 @@
 import type { Ref } from 'react';
 
-import type { CellGeometry, Game, Player, SwipeDir } from '../../types';
+import type { Game } from '../../game/Game';
+import type { Player } from '../../game/Player';
+import type { CellGeometry, SwipeDir } from '../../types';
 import { DamageControls } from './DamageControls';
 import { LifeArea } from './LifeArea';
 import { RollResult } from './RollResult';

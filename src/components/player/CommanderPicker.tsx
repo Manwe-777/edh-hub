@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
+import type { Game } from '../../game/Game';
 import { useCommanderSearch } from '../../hooks/useCommanderSearch';
 import { usePins } from '../../pins/usePins';
 import { artworks } from '../../scryfall/artworks';
 import { mutate } from '../../store/mutate';
-import type { ArtOption, Commander, Game } from '../../types';
+import type { ArtOption, Commander } from '../../types';
 import { UiIcon } from '../icons/UiIcon';
 import { ArtGrid } from './ArtGrid';
 import { CurrentCommander } from './CurrentCommander';
@@ -24,7 +25,7 @@ export function CommanderPicker({ game, id, slot }: Props) {
   const [artErr, setArtErr] = useState<string | null>(null);
   const search = useCommanderSearch(q);
   const pins = usePins();
-  const setCommander = (c: Commander) => mutate((g) => void (g.players[id].commanders[slot] = c), false);
+  const setCommander = (c: Commander) => mutate((g) => g.players[id].setCommander(slot, c), false);
 
   const pickName = (name: string) => {
     setPicked(name);
@@ -57,7 +58,7 @@ export function CommanderPicker({ game, id, slot }: Props) {
         cmd={game.players[id].commanders[slot]}
         slot={slot}
         pins={pins}
-        onClear={() => setCommander({ name: '', art: null, artist: null })}
+        onClear={() => mutate((g) => g.players[id].clearCommander(slot), false)}
       />
       <label className="relative block text-muted">
         <span className="pointer-events-none absolute top-[15px] left-3.5">

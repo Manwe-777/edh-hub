@@ -1,5 +1,6 @@
 import { NAME_H } from '../../constants';
-import type { Game, Player } from '../../types';
+import type { Game } from '../../game/Game';
+import type { Player } from '../../game/Player';
 import { CounterIcon } from '../icons/CounterIcon';
 
 interface Props {

@@ -1,5 +1,5 @@
 import { UNDO_LIMIT } from '../constants';
-import type { Game } from '../types';
+import type { Game } from '../game/Game';
 import { commit } from './commit';
 import { state } from './state';
 
@@ -9,7 +9,7 @@ import { state } from './state';
  */
 export function mutate(fn: (g: Game) => void, undoable = true) {
   const { game, undo } = state.current;
-  const next = structuredClone(game);
+  const next = game.clone();
   fn(next);
   commit({ game: next, undo: undoable ? [...undo, game].slice(-UNDO_LIMIT) : undo });
 }

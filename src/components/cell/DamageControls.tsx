@@ -1,4 +1,5 @@
-import type { Pad, Player, SwipeDir } from '../../types';
+import type { Player } from '../../game/Player';
+import type { Pad, SwipeDir } from '../../types';
 import { PartnerDamage } from './PartnerDamage';
 import { SingleDamage } from './SingleDamage';
 

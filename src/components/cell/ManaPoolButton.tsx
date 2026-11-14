@@ -1,23 +1,21 @@
 import type { CSSProperties } from 'react';
 
-import { clearMana } from '../../game/clearMana';
-import { poolTotal } from '../../game/poolTotal';
+import type { Player } from '../../game/Player';
 import { mutate } from '../../store/mutate';
-import type { Player } from '../../types';
 import { cx } from '../../utils/cx';
 import { Press } from '../common/Press';
 import { ManaPoolIcon } from '../icons/ManaPoolIcon';
 
 /** Tap opens/closes the mana pool; hold empties it. */
 export function ManaPoolButton({ p, style }: { p: Player; style: CSSProperties }) {
-  const total = poolTotal(p);
+  const total = p.poolTotal;
   return (
     <Press
       className={cx('ctr ctr-mana', p.manaOpen && 'on')}
       style={style}
       label="Mana pool"
       onTap={() => mutate((g) => void (g.players[p.id].manaOpen = !g.players[p.id].manaOpen), false)}
-      onHold={() => mutate((g) => clearMana(g, p.id))}
+      onHold={() => mutate((g) => g.players[p.id].clearMana())}
       repeat={false}
     >
       <ManaPoolIcon />

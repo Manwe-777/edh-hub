@@ -8,11 +8,7 @@ interface Props {
   onMenu: () => void;
 }
 
-const closeOverlay = () =>
-  mutate((g) => {
-    g.view = { kind: 'normal' };
-    g.roll = null;
-  }, false);
+const closeOverlay = () => mutate((g) => g.showTable(), false);
 
 /** The round button in the middle of the table. */
 export function HubButton({ x, y, back, onMenu }: Props) {

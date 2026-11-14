@@ -1,7 +1,7 @@
 import { MAX_VISIBLE_COUNTERS } from '../../constants';
-import { toggleCounter } from '../../game/toggleCounter';
+import type { Game } from '../../game/Game';
 import { mutate } from '../../store/mutate';
-import type { Game } from '../../types';
+import { toggleCounter } from '../../utils/toggleCounter';
 import { CounterChips } from '../common/CounterChips';
 import { Screen } from '../common/Screen';
 import { LIST_GROUP } from '../common/styles';

@@ -1,6 +1,6 @@
-import { addMana } from '../../game/addMana';
+import type { Player } from '../../game/Player';
 import { mutate } from '../../store/mutate';
-import type { ManaColor, ManaLayout, Player } from '../../types';
+import type { ManaColor, ManaLayout } from '../../types';
 import { cx } from '../../utils/cx';
 import { Press } from '../common/Press';
 import { ManaSymbol } from '../icons/ManaSymbol';
@@ -19,7 +19,7 @@ export function ManaEntry({ p, c, layout }: Props) {
     <Press
       className="sq-btn bare"
       style={{ width: btn, height: btn }}
-      onTap={() => mutate((g) => addMana(g, p.id, c, n))}
+      onTap={() => mutate((g) => g.addMana(p.id, c, n))}
       label={`${n > 0 ? 'Add' : 'Remove'} ${c}`}
     >
       {n > 0 ? '+' : '−'}

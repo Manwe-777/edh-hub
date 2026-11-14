@@ -1,5 +1,5 @@
+import type { Game } from '../../game/Game';
 import { mutate } from '../../store/mutate';
-import type { Game } from '../../types';
 import { LIST_GROUP, LIST_ROW } from '../common/styles';
 import { UiIcon } from '../icons/UiIcon';
 import { SwitchRow } from './SwitchRow';

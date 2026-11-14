@@ -1,6 +1,7 @@
+import type { Player } from '../../game/Player';
 import { useSpin } from '../../hooks/useSpin';
 import { mutate } from '../../store/mutate';
-import type { Player, Roll } from '../../types';
+import type { Roll } from '../../types';
 import { cx } from '../../utils/cx';
 import { Press } from '../common/Press';
 

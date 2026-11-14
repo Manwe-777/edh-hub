@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react';
 
 import { LETHAL_POISON } from '../../constants';
-import { addCounter } from '../../game/addCounter';
+import type { Player } from '../../game/Player';
 import { mutate } from '../../store/mutate';
-import type { NumericCounter, Player } from '../../types';
+import type { NumericCounter } from '../../types';
 import { cx } from '../../utils/cx';
 import { Press } from '../common/Press';
 import { CounterIcon } from '../icons/CounterIcon';
@@ -20,7 +20,7 @@ export function NumericCounterButton({ p, k, style, onFlash }: Props) {
   const v = p.counters[k];
 
   const step = (n: number) => {
-    mutate((g) => addCounter(g, p.id, k, n));
+    mutate((g) => g.addCounter(p.id, k, n));
     onFlash(k);
   };
 

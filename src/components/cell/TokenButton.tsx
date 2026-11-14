@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react';
 
-import { claimToken } from '../../game/claimToken';
-import { dropToken } from '../../game/dropToken';
+import type { Game } from '../../game/Game';
+import type { Player } from '../../game/Player';
 import { mutate } from '../../store/mutate';
-import type { Game, Player, TokenCounter } from '../../types';
+import type { TokenCounter } from '../../types';
 import { cx } from '../../utils/cx';
 import { Press } from '../common/Press';
 import { CounterIcon } from '../icons/CounterIcon';
@@ -22,8 +22,8 @@ export function TokenButton({ game, p, k, style }: Props) {
       className={cx('ctr', game[k] === p.id && 'on')}
       style={style}
       label={k}
-      onTap={() => mutate((g) => claimToken(g, k, p.id))}
-      onHold={() => mutate((g) => dropToken(g, k, p.id))}
+      onTap={() => mutate((g) => g.claimToken(k, p.id))}
+      onHold={() => mutate((g) => g.dropToken(k, p.id))}
       repeat={false}
     >
       <CounterIcon k={k} />

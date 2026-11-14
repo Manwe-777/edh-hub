@@ -1,4 +1,6 @@
-import type { BarItem, Game, NumericCounter, Player } from '../../types';
+import type { Game } from '../../game/Game';
+import type { Player } from '../../game/Player';
+import type { BarItem, NumericCounter } from '../../types';
 import { ManaPoolButton } from './ManaPoolButton';
 import { NumericCounterButton } from './NumericCounterButton';
 import { TokenButton } from './TokenButton';

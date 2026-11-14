@@ -1,5 +1,4 @@
 import { LETHAL_CMD_DAMAGE } from '../../constants';
-import { addCmdDamage } from '../../game/addCmdDamage';
 import { mutate } from '../../store/mutate';
 import { cx } from '../../utils/cx';
 import type { DamageProps } from './DamageControls';
@@ -8,7 +7,7 @@ import { StepPress } from './StepPress';
 /** Damage from a single commander, with remove/add halves like the life total. */
 export function SingleDamage({ source, target, rotation, swipe, font, pad }: DamageProps) {
   const dmg = target.cmdDamage[source.id][0];
-  const change = (n: number) => mutate((g) => addCmdDamage(g, target.id, source.id, 0, n));
+  const change = (n: number) => mutate((g) => g.addCmdDamage(target.id, source.id, 0, n));
   return (
     <>
       <StepPress

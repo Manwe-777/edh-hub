@@ -1,5 +1,6 @@
 import { LETHAL_POISON } from '../../constants';
-import type { CellGeometry, NumericCounter, Player } from '../../types';
+import type { Player } from '../../game/Player';
+import type { CellGeometry, NumericCounter } from '../../types';
 import { CounterIcon } from '../icons/CounterIcon';
 
 interface Props {

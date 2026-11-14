@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-import type { Store } from '../types';
-import { state } from './state';
+import { state, type Store } from './state';
 
 const subscribe = (l: () => void) => {
   state.listeners.add(l);

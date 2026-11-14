@@ -1,7 +1,7 @@
 import { LETHAL_CMD_DAMAGE } from '../../constants';
-import { addCmdDamage } from '../../game/addCmdDamage';
+import type { Player } from '../../game/Player';
 import { mutate } from '../../store/mutate';
-import type { Player, SwipeDir } from '../../types';
+import type { SwipeDir } from '../../types';
 import { cx } from '../../utils/cx';
 import { StepPress } from './StepPress';
 
@@ -17,7 +17,7 @@ interface Props {
 /** − damage + for one partner commander, with its name below. */
 export function DamageColumn({ source, target, cmd, rotation, swipe, font }: Props) {
   const dmg = target.cmdDamage[source.id][cmd];
-  const change = (n: number) => mutate((g) => addCmdDamage(g, target.id, source.id, cmd, n));
+  const change = (n: number) => mutate((g) => g.addCmdDamage(target.id, source.id, cmd, n));
   return (
     <div className={`dmg-col from-${cmd === 0 ? 'left' : 'right'}`}>
       <div className="dmg-row">

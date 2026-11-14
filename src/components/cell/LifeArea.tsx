@@ -1,8 +1,8 @@
 import type { Ref } from 'react';
 
-import { addLife } from '../../game/addLife';
+import type { Player } from '../../game/Player';
 import { mutate } from '../../store/mutate';
-import type { Pad, Player, SwipeDir } from '../../types';
+import type { Pad, SwipeDir } from '../../types';
 import { LifeTotal } from './LifeTotal';
 import { StepPress } from './StepPress';
 
@@ -20,7 +20,7 @@ interface Props {
 
 /** Life total with lose/gain halves; a defeat line replaces the total once the player has lost. */
 export function LifeArea({ p, rotation, swipe, font, defeat, delta, caption, pad, wrapRef }: Props) {
-  const change = (n: number) => mutate((g) => addLife(g, p.id, n));
+  const change = (n: number) => mutate((g) => g.addLife(p.id, n));
   return (
     <>
       <StepPress className="half left" sign={-1} onStep={change} rotation={rotation} swipe={swipe} label="Lose life">

@@ -1,6 +1,6 @@
 import { STATE_KEY } from '../constants';
-import type { Store } from '../types';
 import { writeStorage } from '../utils/writeStorage';
+import type { Store } from './state';
 import { state } from './state';
 
 /** Replaces the store and saves it synchronously, so the last tap survives a crash or reload. */

@@ -1,13 +1,12 @@
 import { ROTATION } from '../../constants';
-import { cellView } from '../../game/cellView';
-import { commanderArts } from '../../game/commanderArts';
-import { lossCause } from '../../game/lossCause';
+import type { Game } from '../../game/Game';
+import type { Player } from '../../game/Player';
 import { useCounterFlash } from '../../hooks/useCounterFlash';
 import { useDefeatLine } from '../../hooks/useDefeatLine';
 import { useLifeDelta } from '../../hooks/useLifeDelta';
 import { usePresence } from '../../hooks/usePresence';
 import { mutate } from '../../store/mutate';
-import type { Game, Player, Seat, SwipeDir, Viewport } from '../../types';
+import type { Seat, SwipeDir, Viewport } from '../../types';
 import { cellGeometry } from '../../utils/cellGeometry';
 import { cx } from '../../utils/cx';
 import { Rotated } from '../common/Rotated';
@@ -27,24 +26,24 @@ interface Props {
   onOptions: (id: number) => void;
 }
 
-const showDamageTo = (id: number) => mutate((g) => void (g.view = { kind: 'cmd', target: id }), false);
-const showNormal = () => mutate((g) => void (g.view = { kind: 'normal' }), false);
+const showDamageTo = (id: number) => mutate((g) => g.showDamageTo(id), false);
+const showTable = () => mutate((g) => g.showTable(), false);
 
 /** One player's area of the table, laid out in their orientation. */
 export function Cell({ game, player: p, seat, viewport, onOptions }: Props) {
-  const { inCmd, isTarget, manaShown, tally } = cellView(game, p);
-  const cause = lossCause(game, p);
+  const { inCmd, isTarget, manaShown, tally } = game.cellView(p);
+  const cause = game.lossCause(p);
   const defeat = useDefeatLine(p.id, cause);
   const delta = useLifeDelta(p.life, game.epoch);
   const flash = useCounterFlash();
   const mana = usePresence(manaShown);
   const geo = cellGeometry(seat, viewport, !inCmd, tally);
   const rotation = ROTATION[seat.dir];
-  const arts = commanderArts(p);
+  const arts = p.arts;
 
   const swipe = (d: SwipeDir) => {
     if (d === 'up') showDamageTo(p.id);
-    else if (inCmd) showNormal();
+    else if (inCmd) showTable();
     else onOptions(p.id);
   };
 

@@ -16,7 +16,8 @@ export interface Commander {
   artist: string | null;
 }
 
-export interface Player {
+/** A player as saved; the `Player` class adds the rules. */
+export interface PlayerData {
   id: number;
   name: string;
   color: string;
@@ -41,7 +42,8 @@ export interface Roll {
 
 export type View = { kind: 'normal' } | { kind: 'cmd'; target: number };
 
-export interface Game {
+/** A game as saved; the `Game` class adds the rules. */
+export interface GameData {
   version: 1;
   playerCount: number;
   startingLife: number;
@@ -50,7 +52,7 @@ export interface Game {
   cmdTally: boolean;
   /** Counters every player gets on "Reset players". */
   defaultCounters: CounterKey[];
-  players: Player[];
+  players: PlayerData[];
   monarch: number | null;
   initiative: number | null;
   view: View;
@@ -60,11 +62,6 @@ export interface Game {
 }
 
 export type LossCause = 'life' | 'poison' | 'cmd';
-
-export interface Store {
-  game: Game;
-  undo: Game[];
-}
 
 /** A seat's cell as fractions of the portrait screen, and the table edge its player sits at. */
 export interface Seat {
