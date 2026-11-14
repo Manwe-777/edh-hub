@@ -4,8 +4,8 @@ export const MANA: ManaColor[] = ['W', 'U', 'B', 'R', 'G', 'C'];
 /** Colors shown in the mana pool overlay. */
 export const POOL_MANA: ManaColor[] = ['W', 'U', 'B', 'R', 'G'];
 
-/** Numeric counters a player can track. */
-export type NumericCounter = 'poison' | 'experience' | 'energy' | 'rad' | 'tax' | 'storm';
+/** Numeric counters a player can track. `tax2` is the second commander's tax, shown with `tax` for partners. */
+export type NumericCounter = 'poison' | 'experience' | 'energy' | 'rad' | 'tax' | 'tax2' | 'storm';
 /** Single-holder tokens: only one player holds each at a time. */
 export type TokenCounter = 'monarch' | 'initiative';
 export type CounterKey = NumericCounter | TokenCounter;
@@ -23,6 +23,7 @@ export const COUNTER_LABEL: Record<CounterKey, string> = {
   energy: 'Energy',
   rad: 'Rad',
   tax: 'Commander tax',
+  tax2: 'Commander tax (second commander)',
   storm: 'Storm',
 };
 
@@ -89,7 +90,7 @@ export const MAX_PLAYERS = 6;
 
 const emptyCommander = (): Commander => ({ name: '', art: null, artist: null });
 const zeroCounters = (): Record<NumericCounter, number> =>
-  ({ poison: 0, experience: 0, energy: 0, rad: 0, tax: 0, storm: 0 });
+  ({ poison: 0, experience: 0, energy: 0, rad: 0, tax: 0, tax2: 0, storm: 0 });
 const zeroMana = (): Record<ManaColor, number> => ({ W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 });
 const zeroDamage = (): [number, number][] => Array.from({ length: MAX_PLAYERS }, () => [0, 0]);
 

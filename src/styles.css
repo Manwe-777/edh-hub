@@ -325,6 +325,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* which commander a tax button belongs to (partners) */
+.ctr-idx {
+  position: absolute;
+  bottom: -3px;
+  left: -4px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  opacity: .8;
+}
+
 /* roll */
 .roll {
   position: absolute;

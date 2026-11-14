@@ -38,6 +38,7 @@ const MS_CLASS: Partial<Record<CounterKey, string>> = {
   energy: 'ms-e',
   rad: 'ms-counter-rad',
   tax: 'ms-commander',
+  tax2: 'ms-commander',
   storm: 'ms-counter-flame',
   initiative: 'ms-dungeon',
 };

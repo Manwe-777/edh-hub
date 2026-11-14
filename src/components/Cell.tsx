@@ -430,7 +430,11 @@ function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad;
 
 function CounterBar(props: { game: Game; p: Player; h: number; lw: number; manaMode: boolean; onFlash: (k: NumericCounter) => void }) {
   const { game, p, h, lw, manaMode, onFlash } = props;
-  const items: (CounterKey | 'mana')[] = [...p.visibleCounters, 'mana'];
+  // Partners pay tax separately: a second tax button right after the first.
+  const items: (CounterKey | 'mana')[] = [
+    ...p.visibleCounters.flatMap((k): CounterKey[] => (k === 'tax' && p.commanderCount === 2 ? ['tax', 'tax2'] : [k])),
+    'mana',
+  ];
   const size = Math.min(h - 4, lw / items.length - 6);
   return (
     <div className={`bar${manaMode ? ' mana-mode' : ''}`} style={{ height: h }}>
@@ -492,6 +496,7 @@ function CounterButton(props: { game: Game; p: Player; k: CounterKey | 'mana'; s
     >
       <CounterIcon k={k} />
       {v > 0 && <span className="badge">{v}</span>}
+      {p.commanderCount === 2 && (k === 'tax' || k === 'tax2') && <span className="ctr-idx">{k === 'tax' ? 1 : 2}</span>}
     </Press>
   );
 }
