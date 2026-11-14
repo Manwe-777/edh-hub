@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { type Game, resetGame, resetPlayers, rollDie, rollHigh } from '../game';
+import { type Game, MAX_VISIBLE_COUNTERS, resetGame, resetPlayers, rollDie, rollHigh, toggleCounter } from '../game';
+import { CounterChips } from './PlayerOptions';
 import { mutate, undo, useStore } from '../store';
 import { UiIcon } from './icons';
 
@@ -88,6 +89,11 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
               onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
             />
           </div>
+        </section>
+
+        <section className="group">
+          <h3>Default counters <small>up to {MAX_VISIBLE_COUNTERS}, given to everyone on Reset players</small></h3>
+          <CounterChips selected={game.defaultCounters} onToggle={(k) => mutate((g) => toggleCounter(g.defaultCounters, k), false)} />
         </section>
 
         <section className="group">

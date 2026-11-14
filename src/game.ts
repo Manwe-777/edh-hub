@@ -77,6 +77,8 @@ export interface Game {
   keepAwake: boolean;
   /** Show a per-commander damage tally on the right edge of each cell. */
   cmdTally: boolean;
+  /** Counters every player gets on "Reset players". */
+  defaultCounters: CounterKey[];
   players: Player[];
   monarch: number | null;
   initiative: number | null;
@@ -117,6 +119,7 @@ export function newGame(): Game {
     startingLife: 40,
     keepAwake: true,
     cmdTally: false,
+    defaultCounters: [...DEFAULT_COUNTERS],
     players: Array.from({ length: MAX_PLAYERS }, (_, i) => newPlayer(i, 40)),
     monarch: null,
     initiative: null,
@@ -174,8 +177,19 @@ export function resetPlayers(g: Game) {
     const j = d(i + 1) - 1;
     [colors[i], colors[j]] = [colors[j], colors[i]];
   }
-  g.players = g.players.map((_, i) => ({ ...newPlayer(i, g.startingLife), color: colors[i % colors.length] }));
+  g.players = g.players.map((_, i) => ({
+    ...newPlayer(i, g.startingLife),
+    color: colors[i % colors.length],
+    visibleCounters: [...g.defaultCounters],
+  }));
   resetGame(g);
+}
+
+/** Adds or removes a counter from a visible-counters list, up to MAX_VISIBLE_COUNTERS. */
+export function toggleCounter(list: CounterKey[], k: CounterKey) {
+  const i = list.indexOf(k);
+  if (i >= 0) list.splice(i, 1);
+  else if (list.length < MAX_VISIBLE_COUNTERS) list.push(k);
 }
 
 export function resetGame(g: Game) {
@@ -237,6 +251,7 @@ export function migrate(raw: unknown): Game {
       cmdDamage: Array.isArray(p.cmdDamage) && p.cmdDamage.length === MAX_PLAYERS ? p.cmdDamage : np.cmdDamage,
     };
   });
+  if (!Array.isArray(out.defaultCounters)) out.defaultCounters = [...DEFAULT_COUNTERS];
   if (typeof out.playerCount !== 'number' || out.playerCount < 2 || out.playerCount > MAX_PLAYERS) out.playerCount = 4;
   return out;
 }

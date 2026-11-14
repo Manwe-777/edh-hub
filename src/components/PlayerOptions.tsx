@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   ALL_COUNTERS, COUNTER_LABEL, MAX_VISIBLE_COUNTERS, PALETTE,
-  type CounterKey, type Game,
+  type CounterKey, type Game, toggleCounter,
 } from '../game';
 import { mutate } from '../store';
 import { artworks, searchCommanders, type ArtOption } from '../scryfall';
@@ -13,14 +13,6 @@ export function PlayerOptions(props: { game: Game; id: number; leaving: boolean;
   const { game, id, leaving, onClose } = props;
   const p = game.players[id];
   const set = (fn: (g: Game) => void) => mutate(fn, false);
-
-  const toggleCounter = (k: CounterKey) =>
-    set((g) => {
-      const v = g.players[id].visibleCounters;
-      const i = v.indexOf(k);
-      if (i >= 0) v.splice(i, 1);
-      else if (v.length < MAX_VISIBLE_COUNTERS) v.push(k);
-    });
 
   return (
     <div className={`screen${leaving ? ' leaving' : ''}`}>
@@ -71,13 +63,7 @@ export function PlayerOptions(props: { game: Game; id: number; leaving: boolean;
 
         <section className="group">
           <h3>Counters <small>up to {MAX_VISIBLE_COUNTERS}</small></h3>
-          <div className="chips">
-            {ALL_COUNTERS.map((k) => (
-              <button key={k} className={`chip${p.visibleCounters.includes(k) ? ' on' : ''}`} onClick={() => toggleCounter(k)}>
-                <CounterIcon k={k} /> {COUNTER_LABEL[k]}
-              </button>
-            ))}
-          </div>
+          <CounterChips selected={p.visibleCounters} onToggle={(k) => set((g) => toggleCounter(g.players[id].visibleCounters, k))} />
         </section>
       </div>
     </div>
@@ -186,5 +172,18 @@ function NameList({ names, pins, onPick }: { names: string[]; pins: string[]; on
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Counter on/off chips, shared by player options and the game menu's defaults. */
+export function CounterChips({ selected, onToggle }: { selected: CounterKey[]; onToggle: (k: CounterKey) => void }) {
+  return (
+    <div className="chips">
+      {ALL_COUNTERS.map((k) => (
+        <button key={k} className={`chip${selected.includes(k) ? ' on' : ''}`} onClick={() => onToggle(k)}>
+          <CounterIcon k={k} /> {COUNTER_LABEL[k]}
+        </button>
+      ))}
+    </div>
   );
 }
