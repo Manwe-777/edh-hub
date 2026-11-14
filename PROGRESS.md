@@ -75,6 +75,7 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 
 ## Next
 
+- [ ] Possible refactor: model the game and players as classes (state plus the rules acting on it, with save/load and migration), replacing the function-per-file rules in `game/`.
 - [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock
 - [x] Player options sheet uses two columns for sideways seats
 - [ ] Capacitor wrapper + debug APK over adb (Android SDK found at ~/Android/Sdk)
