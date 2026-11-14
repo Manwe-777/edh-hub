@@ -1,112 +1,52 @@
-import { Capacitor, registerPlugin } from '@capacitor/core';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-import { Cell } from './components/Cell';
-import { CenterMenu } from './components/CenterMenu';
-import { PlayerOptions } from './components/PlayerOptions';
-import { LAYOUTS } from './layouts';
-import { mutate, useStore } from './store';
-import { usePresence } from './usePresence';
-
-/** `?phone` (optionally `?phone=412x892`) previews the table in a phone-sized frame on desktop. */
-const PHONE = (() => {
-  const v = new URLSearchParams(location.search).get('phone');
-  if (v === null) return null;
-  const m = /^(\d+)x(\d+)$/.exec(v);
-  return m ? { vw: +m[1], vh: +m[2] } : { vw: 412, vh: 892 };
-})();
-
-function useViewport() {
-  const read = () => PHONE ?? { vw: window.innerWidth, vh: window.innerHeight };
-  const [v, setV] = useState(read);
-  useEffect(() => {
-    const on = () => setV(read());
-    window.addEventListener('resize', on);
-    return () => window.removeEventListener('resize', on);
-  }, []);
-  return v;
-}
-
-const KeepAwake = registerPlugin<{ set(o: { on: boolean }): Promise<void> }>('KeepAwake');
-
-function useWakeLock(on: boolean) {
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      KeepAwake.set({ on }).catch(() => {});
-      return;
-    }
-    if (!on || !('wakeLock' in navigator)) return;
-    let lock: WakeLockSentinel | null = null;
-    let dead = false;
-    const req = async () => {
-      try {
-        if (document.visibilityState === 'visible') lock = await navigator.wakeLock.request('screen');
-        if (dead) lock?.release();
-      } catch {
-        /* not allowed right now */
-      }
-    };
-    req();
-    document.addEventListener('visibilitychange', req);
-    return () => {
-      dead = true;
-      document.removeEventListener('visibilitychange', req);
-      lock?.release();
-    };
-  }, [on]);
-}
+import { Cell } from './components/cell/Cell';
+import { HubButton } from './components/HubButton';
+import { CenterMenu } from './components/menu/CenterMenu';
+import { PlayerOptions } from './components/player/PlayerOptions';
+import { LAYOUTS } from './constants';
+import { usePresence } from './hooks/usePresence';
+import { useViewport } from './hooks/useViewport';
+import { useWakeLock } from './hooks/useWakeLock';
+import { PHONE } from './phone';
+import { useStore } from './store/useStore';
+import { phoneFrameStyle } from './utils/phoneFrameStyle';
 
 export default function App() {
   const { game } = useStore();
-  const { vw, vh } = useViewport();
-  const [menu, setMenu] = useState(false);
-  const [options, setOptions] = useState<number | null>(null);
+  const viewport = useViewport();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  // Kept after closing so the panel can animate out with its content.
+  const [optionsId, setOptionsId] = useState(0);
+  const menu = usePresence(menuOpen);
+  const options = usePresence(optionsOpen);
   useWakeLock(game.keepAwake);
-  const lastOptions = useRef(0);
-  if (options !== null) lastOptions.current = options;
-  const menuP = usePresence(menu);
-  const optionsP = usePresence(options !== null);
-  const optId = lastOptions.current;
 
   const layout = LAYOUTS[game.playerCount];
-  const [hx, hy] = layout.hub;
-  const inCmd = game.view.kind === 'cmd';
+  const openOptions = (id: number) => {
+    setOptionsId(id);
+    setOptionsOpen(true);
+  };
 
   return (
     <div
-      className={`table${PHONE ? ' phone' : ''}`}
-      style={
-        PHONE
-          ? {
-              width: vw,
-              height: vh,
-              transform: `translate(-50%, -50%) scale(${Math.min(1, (window.innerWidth - 16) / vw, (window.innerHeight - 16) / vh)})`,
-            }
-          : undefined
-      }
+      className={PHONE ? 'table phone' : 'table'}
+      style={PHONE ? phoneFrameStyle(PHONE, { w: window.innerWidth, h: window.innerHeight }) : undefined}
       onContextMenu={(e) => e.preventDefault()}
     >
       {layout.seats.map((seat, i) => (
-        <Cell key={i} game={game} player={game.players[i]} seat={seat} vw={vw} vh={vh} onOptions={setOptions} />
+        <Cell key={i} game={game} player={game.players[i]} seat={seat} viewport={viewport} onOptions={openOptions} />
       ))}
-      <button
-        className={`hub${inCmd || game.roll ? ' back' : ''}`}
-        style={{ left: hx * vw, top: hy * vh }}
-        aria-label={inCmd || game.roll ? 'Back' : 'Menu'}
-        onClick={() => {
-          if (inCmd || game.roll)
-            mutate((g) => {
-              g.view = { kind: 'normal' };
-              g.roll = null;
-            }, false);
-          else setMenu(true);
-        }}
-      >
-        {inCmd || game.roll ? '✕' : <span className="hub-icon" />}
-      </button>
-      {menuP.mounted && <CenterMenu game={game} leaving={menuP.leaving} onClose={() => setMenu(false)} />}
-      {optionsP.mounted && optId < game.playerCount && (
-        <PlayerOptions game={game} id={optId} leaving={optionsP.leaving} onClose={() => setOptions(null)} />
+      <HubButton
+        x={layout.hub[0] * viewport.vw}
+        y={layout.hub[1] * viewport.vh}
+        back={game.view.kind === 'cmd' || !!game.roll}
+        onMenu={() => setMenuOpen(true)}
+      />
+      {menu.mounted && <CenterMenu game={game} leaving={menu.leaving} onClose={() => setMenuOpen(false)} />}
+      {options.mounted && optionsId < game.playerCount && (
+        <PlayerOptions game={game} id={optionsId} leaving={options.leaving} onClose={() => setOptionsOpen(false)} />
       )}
     </div>
   );

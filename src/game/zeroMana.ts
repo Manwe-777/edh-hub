@@ -1,0 +1,5 @@
+import type { ManaColor } from '../types';
+
+export function zeroMana(): Record<ManaColor, number> {
+  return { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 };
+}
