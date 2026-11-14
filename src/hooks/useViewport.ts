@@ -8,10 +8,12 @@ const read = (): Viewport => PHONE ?? { vw: window.innerWidth, vh: window.innerH
 /** Screen size (or the `?phone` frame size), updated on resize. */
 export function useViewport(): Viewport {
   const [v, setV] = useState(read);
+
   useEffect(() => {
     const on = () => setV(read());
     window.addEventListener('resize', on);
     return () => window.removeEventListener('resize', on);
   }, []);
+
   return v;
 }

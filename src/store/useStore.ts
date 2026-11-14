@@ -7,6 +7,7 @@ const subscribe = (l: () => void) => {
   state.listeners.add(l);
   return () => state.listeners.delete(l);
 };
+
 const snapshot = () => state.current;
 
 export function useStore(): Store {

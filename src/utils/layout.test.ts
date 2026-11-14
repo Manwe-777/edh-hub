@@ -29,6 +29,7 @@ describe('tallyLayout', () => {
       20,
       60,
     );
+
     expect(l.size).toBe(TALLY_MIN_SQ);
   });
 });

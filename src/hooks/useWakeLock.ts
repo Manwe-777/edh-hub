@@ -11,9 +11,11 @@ export function useWakeLock(on: boolean) {
       KeepAwake.set({ on }).catch(() => {});
       return;
     }
+
     if (!on || !('wakeLock' in navigator)) return;
     let lock: WakeLockSentinel | null = null;
     let dead = false;
+
     const req = async () => {
       try {
         if (document.visibilityState === 'visible') lock = await navigator.wakeLock.request('screen');
@@ -22,8 +24,10 @@ export function useWakeLock(on: boolean) {
         /* not allowed right now */
       }
     };
+
     req();
     document.addEventListener('visibilitychange', req);
+
     return () => {
       dead = true;
       document.removeEventListener('visibilitychange', req);

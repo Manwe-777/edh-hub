@@ -10,6 +10,7 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 const el = document.createElement('div');
+
 const ev = (x: number, y: number, pointerId = 1) =>
   ({
     pointerId,

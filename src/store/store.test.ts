@@ -5,11 +5,13 @@ import { newGame } from '../game/newGame';
 /** The store loads from localStorage when imported, so each test imports a fresh copy. */
 async function freshStore() {
   vi.resetModules();
+
   const [{ mutate }, { undo }, { useStore }] = await Promise.all([
     import('./mutate'),
     import('./undo'),
     import('./useStore'),
   ]);
+
   return { mutate, undo, useStore };
 }
 
@@ -38,10 +40,12 @@ describe('store', () => {
   it('undo restores the game before the last change and returns to the normal view', async () => {
     const mod = await freshStore();
     mod.mutate((g) => void (g.players[0].life = 30));
+
     mod.mutate((g) => {
       g.players[0].life = 20;
       g.view = { kind: 'cmd', target: 0 };
     });
+
     mod.undo();
     const s = await readState(mod);
     expect(s.game.players[0].life).toBe(30);

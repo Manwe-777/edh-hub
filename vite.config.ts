@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 /** Release builds pass APP_VERSION; otherwise use the latest tag, or "dev". */
 function appVersion() {
   if (process.env.APP_VERSION) return process.env.APP_VERSION;
+
   try {
     return execSync('git describe --tags --abbrev=0', { stdio: ['ignore', 'pipe', 'ignore'] })
       .toString()

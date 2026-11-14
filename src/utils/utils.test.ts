@@ -118,6 +118,7 @@ describe('storage helpers', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('full', 'QuotaExceededError');
     });
+
     expect(writeStorage('k', 'v')).toBe(false);
   });
 });

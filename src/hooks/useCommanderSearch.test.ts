@@ -12,6 +12,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   search.mockReset();
 });
+
 afterEach(() => vi.useRealTimers());
 
 const settle = () => act(async () => void (await vi.advanceTimersByTimeAsync(SEARCH_DEBOUNCE_MS)));

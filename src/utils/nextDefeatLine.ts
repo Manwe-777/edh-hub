@@ -4,9 +4,11 @@
  */
 export function nextDefeatLine(bag: string[], taken: ReadonlySet<string>): string | null {
   if (!bag.length) return null;
+
   const i = Math.max(
     0,
     bag.findIndex((l) => !taken.has(l)),
   );
+
   return bag.splice(i, 1)[0];
 }

@@ -24,6 +24,7 @@ export default function App() {
   useWakeLock(game.keepAwake);
 
   const layout = LAYOUTS[game.playerCount];
+
   const openOptions = (id: number) => {
     setOptionsId(id);
     setOptionsOpen(true);

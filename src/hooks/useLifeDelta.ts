@@ -8,6 +8,7 @@ export function useLifeDelta(life: number, epoch: number) {
   const prevEpoch = useRef(epoch);
   const [delta, setDelta] = useState(0);
   const timer = useRef<number>(undefined);
+
   useEffect(() => {
     if (epoch !== prevEpoch.current) {
       prevEpoch.current = epoch;
@@ -15,6 +16,7 @@ export function useLifeDelta(life: number, epoch: number) {
       setDelta(0);
       return;
     }
+
     const d = life - prev.current;
     prev.current = life;
     if (!d) return;
@@ -22,6 +24,7 @@ export function useLifeDelta(life: number, epoch: number) {
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setDelta(0), LIFE_DELTA_MS);
   }, [life, epoch]);
+
   useEffect(() => () => window.clearTimeout(timer.current), []);
   return delta;
 }

@@ -7,6 +7,7 @@ describe('rollHigh', () => {
   /** Makes crypto.getRandomValues return the given d20 faces in order. */
   function rigDice(faces: number[]) {
     let i = 0;
+
     vi.spyOn(crypto, 'getRandomValues').mockImplementation((a) => {
       (a as Uint32Array)[0] = faces[i++] - 1;
       return a;

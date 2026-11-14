@@ -49,6 +49,7 @@ describe('useLifeDelta', () => {
     const { result, rerender } = renderHook(({ life, epoch }) => useLifeDelta(life, epoch), {
       initialProps: { life: 40, epoch: 0 },
     });
+
     rerender({ life: 30, epoch: 0 });
     expect(result.current).toBe(-10);
     rerender({ life: 40, epoch: 1 });
@@ -60,10 +61,12 @@ describe('useSpin', () => {
   it('flickers through d20 faces and settles on the rolled value', () => {
     const { result } = renderHook(() => useSpin(17));
     const seen = new Set<number>();
+
     for (let t = 0; t < SPIN_MS; t += 50) {
       act(() => vi.advanceTimersByTime(50));
       if (!result.current.done) seen.add(result.current.value);
     }
+
     act(() => vi.advanceTimersByTime(500));
     expect(result.current).toEqual({ value: 17, done: true });
     expect(seen.size).toBeGreaterThan(3);

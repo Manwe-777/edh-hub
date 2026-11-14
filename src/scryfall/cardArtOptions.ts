@@ -5,6 +5,7 @@ export function cardArtOptions(c: ScryfallCard): ArtOption[] {
   if (c.image_uris?.art_crop) {
     return [{ key: c.id, art: c.image_uris.art_crop, artist: c.artist ?? '', label: c.set_name }];
   }
+
   return (c.card_faces ?? []).flatMap((f, i) =>
     f.image_uris?.art_crop
       ? [

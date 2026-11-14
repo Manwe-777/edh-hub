@@ -16,6 +16,7 @@ export function useDefeatLine(playerId: number, cause: LossCause | null): string
     if (!cause) return;
     const pool = [...DEFEAT_LINES, ...DEFEAT_LINES_BY_CAUSE[cause]];
     let bag = shuffle(pool);
+
     const next = () => {
       const taken = new Set([...showing].filter(([id]) => id !== playerId).map(([, l]) => l));
       if (!bag.length) bag = shuffle(pool);
@@ -23,8 +24,10 @@ export function useDefeatLine(playerId: number, cause: LossCause | null): string
       showing.set(playerId, line);
       setShown({ cause, line });
     };
+
     const first = window.setTimeout(next, 0);
     const t = window.setInterval(next, DEFEAT_ROTATE_MS);
+
     return () => {
       window.clearTimeout(first);
       window.clearInterval(t);

@@ -12,6 +12,7 @@ export function resetGame(g: Game) {
     p.mana = zeroMana();
     p.manaOpen = false;
   }
+
   g.monarch = null;
   g.initiative = null;
   g.view = { kind: 'normal' };

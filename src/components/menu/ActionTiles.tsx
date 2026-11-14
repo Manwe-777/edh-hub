@@ -9,10 +9,12 @@ import { UiIcon } from '../icons/UiIcon';
 /** Roll high, undo and the two resets; all but undo close the menu. */
 export function ActionTiles({ onDone }: { onDone: () => void }) {
   const { undo: undoStack } = useStore();
+
   const andClose = (fn: () => void) => () => {
     fn();
     onDone();
   };
+
   return (
     <div className="tiles">
       <button className="tile" onClick={andClose(() => mutate((g) => rollHigh(g), false))}>

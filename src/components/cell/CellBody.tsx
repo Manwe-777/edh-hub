@@ -20,6 +20,7 @@ interface Props {
 export function CellBody({ game, p, geo, rotation, swipe, defeat, delta, lifeRef }: Props) {
   const view = game.view;
   if (game.roll) return <RollResult key={game.roll.id} roll={game.roll} p={p} font={geo.lifeFont} />;
+
   if (view.kind === 'cmd' && view.target !== p.id) {
     return (
       <DamageControls
@@ -32,6 +33,7 @@ export function CellBody({ game, p, geo, rotation, swipe, defeat, delta, lifeRef
       />
     );
   }
+
   return (
     <LifeArea
       p={p}

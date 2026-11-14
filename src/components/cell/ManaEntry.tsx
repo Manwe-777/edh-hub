@@ -14,6 +14,7 @@ interface Props {
 /** One color's count with − and + (in a row: − count +; stacked: + count −). */
 export function ManaEntry({ p, c, layout }: Props) {
   const { row, btn, slotW, slotH } = layout;
+
   const button = (n: 1 | -1) => (
     <Press
       className="sq-btn bare"
@@ -24,6 +25,7 @@ export function ManaEntry({ p, c, layout }: Props) {
       {n > 0 ? '+' : '−'}
     </Press>
   );
+
   return (
     <div className={cx('mana-entry', row && 'row')} style={{ width: slotW, height: slotH }}>
       {button(row ? -1 : 1)}

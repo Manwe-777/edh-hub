@@ -27,6 +27,7 @@ describe('useDefeatLine', () => {
   it('never shows the same line on two lost players at once', () => {
     const a = renderHook(() => useDefeatLine(0, 'life'));
     const b = renderHook(() => useDefeatLine(1, 'life'));
+
     for (let i = 0; i < 20; i++) {
       act(() => vi.advanceTimersByTime(DEFEAT_ROTATE_MS));
       expect(a.result.current).not.toBe(b.result.current);
@@ -37,6 +38,7 @@ describe('useDefeatLine', () => {
     const { result, rerender } = renderHook(({ cause }) => useDefeatLine(2, cause), {
       initialProps: { cause: 'cmd' as LossCause | null },
     });
+
     act(() => vi.advanceTimersByTime(1));
     expect(result.current).not.toBeNull();
     rerender({ cause: null });

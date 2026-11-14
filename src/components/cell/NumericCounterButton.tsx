@@ -18,10 +18,12 @@ interface Props {
 /** Tap adds one, hold removes one; either way the value flashes over the life total. */
 export function NumericCounterButton({ p, k, style, onFlash }: Props) {
   const v = p.counters[k];
+
   const step = (n: number) => {
     mutate((g) => addCounter(g, p.id, k, n));
     onFlash(k);
   };
+
   const partnerTax = p.commanderCount === 2 && (k === 'tax' || k === 'tax2');
   return (
     <Press

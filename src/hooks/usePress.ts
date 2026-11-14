@@ -15,9 +15,11 @@ interface Track {
 /** Tap / hold-with-repeat / vertical swipe on one element, via pointer events. */
 export function usePress(opts: PressOptions) {
   const o = useRef(opts);
+
   useLayoutEffect(() => {
     o.current = opts;
   });
+
   const t = useRef<Track | null>(null);
   const timers = useRef<{ hold?: number; rep?: number }>({});
   const el = useRef<HTMLElement | null>(null);
@@ -26,11 +28,13 @@ export function usePress(opts: PressOptions) {
     el.current?.classList.remove('pressed');
     el.current = null;
   };
+
   const clear = () => {
     window.clearTimeout(timers.current.hold);
     window.clearInterval(timers.current.rep);
     timers.current = {};
   };
+
   const startHold = () => {
     if (!t.current) return;
     t.current.held = true;
@@ -43,11 +47,13 @@ export function usePress(opts: PressOptions) {
     onPointerDown(e: PointerEvent<HTMLElement>) {
       if (t.current) return; // one pointer per element
       e.stopPropagation();
+
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
       } catch {
         /* pointer already gone */
       }
+
       t.current = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false, held: false };
       el.current = e.currentTarget;
       el.current.classList.add('pressed');
@@ -67,10 +73,12 @@ export function usePress(opts: PressOptions) {
       release();
       t.current = null;
       if (s.held) return;
+
       if (!s.moved) {
         o.current.onTap?.();
         return;
       }
+
       const dir = swipeDirection(e.clientX - s.x, e.clientY - s.y, o.current.rotation ?? 0);
       if (dir) o.current.onSwipe?.(dir);
     },

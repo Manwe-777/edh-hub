@@ -9,6 +9,7 @@ const ROLLS = {
   d6: () => `d6 · ${rollDie(6)}`,
   d20: () => `d20 · ${rollDie(20)}`,
 };
+
 type RollKind = keyof typeof ROLLS;
 const KINDS = Object.keys(ROLLS) as RollKind[];
 

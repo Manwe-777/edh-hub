@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettier from 'eslint-config-prettier';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -16,10 +17,38 @@ export default defineConfig([
       ecmaVersion: 2022,
       globals: { ...globals.browser, ...globals.node },
     },
-    plugins: { 'simple-import-sort': simpleImportSort },
+    plugins: { 'simple-import-sort': simpleImportSort, '@stylistic': stylistic },
     rules: {
       complexity: ['error', 10],
       'max-depth': ['error', 3],
+      // A blank line around every function, class and multi-line statement, so blocks don't run together.
+      '@stylistic/padding-line-between-statements': [
+        'error',
+        {
+          blankLine: 'always',
+          prev: [
+            'function',
+            'class',
+            'multiline-const',
+            'multiline-let',
+            'multiline-block-like',
+            'multiline-expression',
+          ],
+          next: '*',
+        },
+        {
+          blankLine: 'always',
+          prev: '*',
+          next: [
+            'function',
+            'class',
+            'multiline-const',
+            'multiline-let',
+            'multiline-block-like',
+            'multiline-expression',
+          ],
+        },
+      ],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],

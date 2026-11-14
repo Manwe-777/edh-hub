@@ -33,6 +33,7 @@ export function CommanderPicker({ game, id, slot }: Props) {
     setArtErr(null);
     artworks(name).then(setArts, () => setArtErr('Could not load artworks'));
   };
+
   const pickArt = (a: ArtOption) => {
     setCommander({ name: picked!, art: a.art, artist: a.artist });
     setArts(null);
@@ -40,12 +41,14 @@ export function CommanderPicker({ game, id, slot }: Props) {
   };
 
   const searching = q.trim().length >= 2;
+
   // Pinned ones first, then Scryfall's order (most played).
   const names = searching
     ? [...search.names.filter((n) => pins.includes(n)), ...search.names.filter((n) => !pins.includes(n))]
     : picked
       ? []
       : pins;
+
   const err = search.error ?? artErr;
 
   return (

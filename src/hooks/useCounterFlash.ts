@@ -13,11 +13,13 @@ export function useCounterFlash() {
   const [flash, setFlash] = useState<{ k: NumericCounter; n: number } | null>(null);
   const timer = useRef<number>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
+
   const show = (k: NumericCounter) => {
     setFlash((f) => ({ k, n: (f?.n ?? 0) + 1 }));
     lifeRef.current?.animate(FLASH_FRAMES, { duration: FLASH_MS, easing: 'linear' });
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setFlash(null), FLASH_MS);
   };
+
   return { lifeRef, flash, show };
 }

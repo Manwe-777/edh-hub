@@ -47,12 +47,14 @@ describe('Reset all and Reset players', () => {
     resetPlayers(g);
 
     expect(new Set(g.players.map((p) => p.color)).size).toBe(g.players.length);
+
     for (const p of g.players) {
       expect(PALETTE).toContain(p.color);
       expect(p.commanderCount).toBe(1);
       expect(p.commanders[0].name).toBe('');
       expect(p.visibleCounters).toEqual(['energy', 'rad']);
     }
+
     expect(g.players[0].name).toBe('Player 1');
   });
 

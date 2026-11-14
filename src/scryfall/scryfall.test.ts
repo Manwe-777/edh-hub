@@ -35,6 +35,7 @@ describe('searchCommanders', () => {
         { name: 'Atraxa, Grand Unifier' },
       ],
     });
+
     expect(await searchCommanders('atra')).toEqual([
       "Atraxa, Praetors' Voice",
       'Atraxa, Grand Unifier',
@@ -77,6 +78,7 @@ describe('artworks', () => {
         },
       ],
     });
+
     expect(await artworks('X')).toEqual([
       { key: 'a', art: 'a.jpg', artist: 'Ann', label: 'Alpha' },
       { key: 'b-0', art: 'f.jpg', artist: 'Bob', label: 'Beta · front' },

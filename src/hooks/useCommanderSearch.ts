@@ -18,12 +18,14 @@ export function useCommanderSearch(q: string): Result {
   useEffect(() => {
     if (short) return;
     const ac = new AbortController();
+
     const t = window.setTimeout(() => {
       searchCommanders(q, ac.signal).then(
         (names) => setResult({ names, error: null }),
         (e: Error) => e.name !== 'AbortError' && setResult({ names: [], error: 'Search failed — offline?' }),
       );
     }, SEARCH_DEBOUNCE_MS);
+
     return () => {
       window.clearTimeout(t);
       ac.abort();

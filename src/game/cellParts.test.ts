@@ -54,10 +54,12 @@ describe('counterBarItems', () => {
 describe('commanderArts', () => {
   it('returns the art of commanders in play only', () => {
     const p = newGame().players[0];
+
     p.commanders = [
       { name: 'A', art: 'a.jpg', artist: null },
       { name: 'B', art: 'b.jpg', artist: null },
     ];
+
     expect(commanderArts(p)).toEqual(['a.jpg']);
     p.commanderCount = 2;
     expect(commanderArts(p)).toEqual(['a.jpg', 'b.jpg']);
