@@ -4,6 +4,7 @@ import { LIFE_PRESETS } from '../../constants';
 import { mutate } from '../../store/mutate';
 import { cx } from '../../utils/cx';
 import { Segmented } from '../common/Segmented';
+import { SEGMENT_CELL, SEGMENT_OFF, SEGMENT_ON } from '../common/styles';
 
 const setLife = (n: number) => mutate((g) => void (g.startingLife = n), false);
 
@@ -18,7 +19,11 @@ export function StartingLifePicker({ life }: { life: number }) {
       onSelect={setLife}
       extra={
         <input
-          className={cx(isCustom && !custom && 'on')}
+          className={cx(
+            SEGMENT_CELL,
+            'p-0 focus:bg-surface-2 focus:text-text',
+            isCustom && !custom ? SEGMENT_ON : `${SEGMENT_OFF} bg-transparent`,
+          )}
           inputMode="numeric"
           placeholder={isCustom ? String(life) : 'Other'}
           value={custom}

@@ -4,6 +4,7 @@ import { mutate } from '../../store/mutate';
 import type { Game } from '../../types';
 import { CounterChips } from '../common/CounterChips';
 import { Screen } from '../common/Screen';
+import { LIST_GROUP } from '../common/styles';
 import { AboutRow } from './AboutRow';
 import { ActionTiles } from './ActionTiles';
 import { MenuSection } from './MenuSection';
@@ -21,7 +22,7 @@ interface Props {
 /** The game menu: actions, table setup, quick dice and settings. */
 export function CenterMenu({ game, leaving, onClose }: Props) {
   return (
-    <Screen leaving={leaving} onClose={onClose} head={<h2>Game</h2>}>
+    <Screen leaving={leaving} onClose={onClose} head={<h2 className="flex-1 text-[22px] font-medium">Game</h2>}>
       <ActionTiles onDone={onClose} />
       <MenuSection icon="users" title="Players">
         <PlayerCountPicker count={game.playerCount} />
@@ -37,7 +38,7 @@ export function CenterMenu({ game, leaving, onClose }: Props) {
       </MenuSection>
       <QuickRoll />
       <SettingsList game={game} />
-      <section className="group list">
+      <section className={LIST_GROUP}>
         <AboutRow />
       </section>
     </Screen>

@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -22,6 +23,7 @@ export default defineConfig({
   base: './',
   define: { __APP_VERSION__: JSON.stringify(appVersion()) },
   plugins: [
+    tailwindcss(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',

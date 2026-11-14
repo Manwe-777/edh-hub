@@ -23,7 +23,7 @@ export function QuickRoll() {
       title="Quick roll"
       aside={
         result && (
-          <span className="quick-result" key={result.n}>
+          <span className="ml-auto animate-pop text-[15px] text-text" key={result.n}>
             {result.text}
           </span>
         )

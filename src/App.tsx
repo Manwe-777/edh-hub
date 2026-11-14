@@ -32,7 +32,7 @@ export default function App() {
 
   return (
     <div
-      className={PHONE ? 'table phone' : 'table'}
+      className={PHONE ? 'phone table' : 'table'}
       style={PHONE ? phoneFrameStyle(PHONE, { w: window.innerWidth, h: window.innerHeight }) : undefined}
       onContextMenu={(e) => e.preventDefault()}
     >

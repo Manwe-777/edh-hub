@@ -52,21 +52,28 @@ export function CommanderPicker({ game, id, slot }: Props) {
   const err = search.error ?? artErr;
 
   return (
-    <div className="cmdr">
+    <div className="mt-3 flex flex-col gap-2.5 rounded-2xl bg-surface p-3">
       <CurrentCommander
         cmd={game.players[id].commanders[slot]}
         slot={slot}
         pins={pins}
         onClear={() => setCommander({ name: '', art: null, artist: null })}
       />
-      <label className="search">
-        <UiIcon name="search" size={18} />
-        <input placeholder="Search commanders…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <label className="relative block text-muted">
+        <span className="pointer-events-none absolute top-[15px] left-3.5">
+          <UiIcon name="search" size={18} />
+        </span>
+        <input
+          className="bg-surface-2 pl-[42px]"
+          placeholder="Search commanders…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
       </label>
       {names.length > 0 && <NameList names={names} pins={pins} onPick={pickName} />}
-      {picked && !arts && !err && <div className="muted">Loading artworks for {picked}…</div>}
+      {picked && !arts && !err && <div className="text-[13px] text-muted">Loading artworks for {picked}…</div>}
       {arts && <ArtGrid arts={arts} onPick={pickArt} />}
-      {err && <div className="err">{err}</div>}
+      {err && <div className="text-[13px] text-err">{err}</div>}
     </div>
   );
 }

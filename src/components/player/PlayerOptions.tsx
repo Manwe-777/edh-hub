@@ -28,7 +28,7 @@ export function PlayerOptions({ game, id, leaving, onClose }: Props) {
       onClose={onClose}
       head={
         <>
-          <span className="head-dot" style={{ background: p.color }} />
+          <span className="size-3.5 flex-none rounded-full" style={{ background: p.color }} />
           <NameInput name={p.name} onChange={(name) => set((g) => void (g.players[id].name = name))} />
         </>
       }
