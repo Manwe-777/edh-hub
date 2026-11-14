@@ -10,7 +10,7 @@ import {
   toggleCounter,
 } from '../game';
 import { togglePin, usePins } from '../pins';
-import { type ArtOption,artworks, searchCommanders } from '../scryfall';
+import { type ArtOption, artworks, searchCommanders } from '../scryfall';
 import { mutate } from '../store';
 import { CounterIcon, UiIcon } from './icons';
 

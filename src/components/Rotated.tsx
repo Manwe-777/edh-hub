@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 
 import type { Dir } from '../game';
-import { isSideways,ROTATION } from '../layouts';
+import { isSideways, ROTATION } from '../layouts';
 
 /** Fills a w×h box with content laid out in the player's orientation. */
 export function Rotated(props: {

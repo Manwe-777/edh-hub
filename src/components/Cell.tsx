@@ -1,4 +1,4 @@
-import { type CSSProperties,useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 import { useDefeatLine } from '../defeat';
 import {
@@ -19,7 +19,7 @@ import { mutate } from '../store';
 import { usePresence } from '../usePresence';
 import { CounterIcon, ManaPoolIcon, ManaSymbol } from './icons';
 import { Press } from './PressButton';
-import { localSize,Rotated } from './Rotated';
+import { localSize, Rotated } from './Rotated';
 
 const GAP = 3;
 /**

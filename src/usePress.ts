@@ -1,4 +1,4 @@
-import { type PointerEvent,useRef } from 'react';
+import { type PointerEvent, useRef } from 'react';
 
 export interface PressOptions {
   onTap?: () => void;
