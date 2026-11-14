@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+
 import { type Game, migrate, newGame } from './game';
 
 const KEY = 'edh-hub/state';

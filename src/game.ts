@@ -11,7 +11,16 @@ export type TokenCounter = 'monarch' | 'initiative';
 export type CounterKey = NumericCounter | TokenCounter;
 
 export const NUMERIC_COUNTERS: NumericCounter[] = ['poison', 'experience', 'energy', 'rad', 'tax', 'storm'];
-export const ALL_COUNTERS: CounterKey[] = ['poison', 'experience', 'monarch', 'initiative', 'energy', 'rad', 'tax', 'storm'];
+export const ALL_COUNTERS: CounterKey[] = [
+  'poison',
+  'experience',
+  'monarch',
+  'initiative',
+  'energy',
+  'rad',
+  'tax',
+  'storm',
+];
 export const DEFAULT_COUNTERS: CounterKey[] = ['tax', 'storm', 'poison'];
 export const MAX_VISIBLE_COUNTERS = 5;
 
@@ -29,8 +38,16 @@ export const COUNTER_LABEL: Record<CounterKey, string> = {
 
 /** Bright, slightly pastel cell colors; text and icons on them are black. */
 export const PALETTE = [
-  '#4f8fe8', '#ec5f57', '#34b46e', '#9a6ff0', '#f0922e', '#22aea4',
-  '#e7609f', '#7d8796', '#c9a043', '#6f78ee',
+  '#4f8fe8',
+  '#ec5f57',
+  '#34b46e',
+  '#9a6ff0',
+  '#f0922e',
+  '#22aea4',
+  '#e7609f',
+  '#7d8796',
+  '#c9a043',
+  '#6f78ee',
 ];
 /** First palette, mapped index-for-index onto the current one when loading old saves. */
 const OLD_PALETTES = [
@@ -91,8 +108,15 @@ export interface Game {
 export const MAX_PLAYERS = 6;
 
 const emptyCommander = (): Commander => ({ name: '', art: null, artist: null });
-const zeroCounters = (): Record<NumericCounter, number> =>
-  ({ poison: 0, experience: 0, energy: 0, rad: 0, tax: 0, tax2: 0, storm: 0 });
+const zeroCounters = (): Record<NumericCounter, number> => ({
+  poison: 0,
+  experience: 0,
+  energy: 0,
+  rad: 0,
+  tax: 0,
+  tax2: 0,
+  storm: 0,
+});
 const zeroMana = (): Record<ManaColor, number> => ({ W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 });
 const zeroDamage = (): [number, number][] => Array.from({ length: MAX_PLAYERS }, () => [0, 0]);
 

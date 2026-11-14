@@ -1,8 +1,9 @@
 import { useState } from 'react';
+
 import { type Game, MAX_VISIBLE_COUNTERS, resetGame, resetPlayers, rollDie, rollHigh, toggleCounter } from '../game';
-import { CounterChips } from './PlayerOptions';
 import { mutate, undo, useStore } from '../store';
 import { UiIcon } from './icons';
+import { CounterChips } from './PlayerOptions';
 
 const LIFE_PRESETS = [20, 30, 40];
 const PLAYER_COUNTS = [2, 3, 4, 5, 6];
@@ -49,17 +50,21 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
         </div>
 
         <section className="group">
-          <h3><UiIcon name="users" size={18} /> Players</h3>
+          <h3>
+            <UiIcon name="users" size={18} /> Players
+          </h3>
           <div className="segmented" style={{ ['--n' as string]: PLAYER_COUNTS.length }}>
             {PLAYER_COUNTS.map((n) => (
               <button
                 key={n}
                 className={game.playerCount === n ? 'on' : ''}
-                onClick={() => mutate((g) => {
-                  g.playerCount = n;
-                  if (g.view.kind === 'cmd' && g.view.target >= n) g.view = { kind: 'normal' };
-                  g.roll = null;
-                })}
+                onClick={() =>
+                  mutate((g) => {
+                    g.playerCount = n;
+                    if (g.view.kind === 'cmd' && g.view.target >= n) g.view = { kind: 'normal' };
+                    g.roll = null;
+                  })
+                }
               >
                 {n}
               </button>
@@ -68,10 +73,16 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
         </section>
 
         <section className="group">
-          <h3><UiIcon name="heart" size={18} /> Starting life <small>applies on reset</small></h3>
+          <h3>
+            <UiIcon name="heart" size={18} /> Starting life <small>applies on reset</small>
+          </h3>
           <div className="segmented" style={{ ['--n' as string]: LIFE_PRESETS.length + 1 }}>
             {LIFE_PRESETS.map((n) => (
-              <button key={n} className={game.startingLife === n ? 'on' : ''} onClick={() => mutate((g) => void (g.startingLife = n), false)}>
+              <button
+                key={n}
+                className={game.startingLife === n ? 'on' : ''}
+                onClick={() => mutate((g) => void (g.startingLife = n), false)}
+              >
                 {n}
               </button>
             ))}
@@ -92,14 +103,23 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
         </section>
 
         <section className="group">
-          <h3>Default counters <small>up to {MAX_VISIBLE_COUNTERS}, given to everyone on Reset players</small></h3>
-          <CounterChips selected={game.defaultCounters} onToggle={(k) => mutate((g) => toggleCounter(g.defaultCounters, k), false)} />
+          <h3>
+            Default counters <small>up to {MAX_VISIBLE_COUNTERS}, given to everyone on Reset players</small>
+          </h3>
+          <CounterChips
+            selected={game.defaultCounters}
+            onToggle={(k) => mutate((g) => toggleCounter(g.defaultCounters, k), false)}
+          />
         </section>
 
         <section className="group">
           <h3>
             <UiIcon name="dice" size={18} /> Quick roll
-            {result && <span className="quick-result" key={result.n}>{result.text}</span>}
+            {result && (
+              <span className="quick-result" key={result.n}>
+                {result.text}
+              </span>
+            )}
           </h3>
           <div className="segmented plain" style={{ ['--n' as string]: 3 }}>
             <button onClick={() => quick(rollDie(2) === 1 ? 'Heads' : 'Tails')}>Coin</button>
@@ -121,7 +141,9 @@ export function CenterMenu({ game, leaving, onClose }: { game: Game; leaving: bo
           </button>
           <button
             className="row"
-            onClick={() => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.())}
+            onClick={() =>
+              document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.()
+            }
           >
             <UiIcon name="expand" size={20} />
             <span>Fullscreen</span>

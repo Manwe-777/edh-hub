@@ -1,13 +1,17 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'node:child_process';
+
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 /** Release builds pass APP_VERSION; otherwise use the latest tag, or "dev". */
 function appVersion() {
   if (process.env.APP_VERSION) return process.env.APP_VERSION;
   try {
-    return execSync('git describe --tags --abbrev=0', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().replace(/^v/, '');
+    return execSync('git describe --tags --abbrev=0', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim()
+      .replace(/^v/, '');
   } catch {
     return 'dev';
   }

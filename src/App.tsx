@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { usePresence } from './usePresence';
-import { LAYOUTS } from './layouts';
-import { mutate, useStore } from './store';
+import { useEffect, useRef, useState } from 'react';
+
 import { Cell } from './components/Cell';
 import { CenterMenu } from './components/CenterMenu';
 import { PlayerOptions } from './components/PlayerOptions';
+import { LAYOUTS } from './layouts';
+import { mutate, useStore } from './store';
+import { usePresence } from './usePresence';
 
 /** `?phone` (optionally `?phone=412x892`) previews the table in a phone-sized frame on desktop. */
 const PHONE = (() => {
@@ -93,7 +94,11 @@ export default function App() {
         style={{ left: hx * vw, top: hy * vh }}
         aria-label={inCmd || game.roll ? 'Back' : 'Menu'}
         onClick={() => {
-          if (inCmd || game.roll) mutate((g) => { g.view = { kind: 'normal' }; g.roll = null; }, false);
+          if (inCmd || game.roll)
+            mutate((g) => {
+              g.view = { kind: 'normal' };
+              g.roll = null;
+            }, false);
           else setMenu(true);
         }}
       >
@@ -101,12 +106,7 @@ export default function App() {
       </button>
       {menuP.mounted && <CenterMenu game={game} leaving={menuP.leaving} onClose={() => setMenu(false)} />}
       {optionsP.mounted && optId < game.playerCount && (
-        <PlayerOptions
-          game={game}
-          id={optId}
-          leaving={optionsP.leaving}
-          onClose={() => setOptions(null)}
-        />
+        <PlayerOptions game={game} id={optId} leaving={optionsP.leaving} onClose={() => setOptions(null)} />
       )}
     </div>
   );

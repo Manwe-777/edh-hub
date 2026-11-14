@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
+
 import {
-  ALL_COUNTERS, COUNTER_LABEL, MAX_VISIBLE_COUNTERS, PALETTE,
-  type CounterKey, type Game, toggleCounter,
+  ALL_COUNTERS,
+  COUNTER_LABEL,
+  type CounterKey,
+  type Game,
+  MAX_VISIBLE_COUNTERS,
+  PALETTE,
+  toggleCounter,
 } from '../game';
-import { mutate } from '../store';
-import { artworks, searchCommanders, type ArtOption } from '../scryfall';
 import { togglePin, usePins } from '../pins';
+import { type ArtOption,artworks, searchCommanders } from '../scryfall';
+import { mutate } from '../store';
 import { CounterIcon, UiIcon } from './icons';
 
 /** Full-screen options panel, always upright so the on-screen keyboard matches it. */
@@ -33,7 +39,9 @@ export function PlayerOptions(props: { game: Game; id: number; leaving: boolean;
         </header>
 
         <section className="group">
-          <h3><UiIcon name="palette" size={18} /> Color</h3>
+          <h3>
+            <UiIcon name="palette" size={18} /> Color
+          </h3>
           <div className="swatches">
             {PALETTE.map((c) => (
               <button
@@ -48,10 +56,16 @@ export function PlayerOptions(props: { game: Game; id: number; leaving: boolean;
         </section>
 
         <section className="group">
-          <h3><UiIcon name="user" size={18} /> Commanders</h3>
+          <h3>
+            <UiIcon name="user" size={18} /> Commanders
+          </h3>
           <div className="segmented" style={{ ['--n' as string]: 2 }}>
             {([1, 2] as const).map((n) => (
-              <button key={n} className={p.commanderCount === n ? 'on' : ''} onClick={() => set((g) => void (g.players[id].commanderCount = n))}>
+              <button
+                key={n}
+                className={p.commanderCount === n ? 'on' : ''}
+                onClick={() => set((g) => void (g.players[id].commanderCount = n))}
+              >
                 {n === 1 ? 'One' : 'Two (partners)'}
               </button>
             ))}
@@ -62,8 +76,13 @@ export function PlayerOptions(props: { game: Game; id: number; leaving: boolean;
         </section>
 
         <section className="group">
-          <h3>Counters <small>up to {MAX_VISIBLE_COUNTERS}</small></h3>
-          <CounterChips selected={p.visibleCounters} onToggle={(k) => set((g) => toggleCounter(g.players[id].visibleCounters, k))} />
+          <h3>
+            Counters <small>up to {MAX_VISIBLE_COUNTERS}</small>
+          </h3>
+          <CounterChips
+            selected={p.visibleCounters}
+            onToggle={(k) => set((g) => toggleCounter(g.players[id].visibleCounters, k))}
+          />
         </section>
       </div>
     </div>
@@ -88,7 +107,10 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
     const ac = new AbortController();
     const t = window.setTimeout(() => {
       setErr(null);
-      searchCommanders(q, ac.signal).then(setNames, (e) => e.name !== 'AbortError' && setErr('Search failed — offline?'));
+      searchCommanders(q, ac.signal).then(
+        setNames,
+        (e) => e.name !== 'AbortError' && setErr('Search failed — offline?'),
+      );
     }, 300);
     return () => {
       window.clearTimeout(t);
@@ -121,7 +143,13 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
         </div>
         {cmd.name && <PinButton name={cmd.name} pinned={pins.includes(cmd.name)} />}
         {cmd.name && (
-          <button className="icon-btn small" aria-label="Clear" onClick={() => mutate((g) => void (g.players[id].commanders[slot] = { name: '', art: null, artist: null }), false)}>
+          <button
+            className="icon-btn small"
+            aria-label="Clear"
+            onClick={() =>
+              mutate((g) => void (g.players[id].commanders[slot] = { name: '', art: null, artist: null }), false)
+            }
+          >
             <UiIcon name="close" size={18} />
           </button>
         )}
@@ -130,14 +158,16 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
         <UiIcon name="search" size={18} />
         <input placeholder="Search commanders…" value={q} onChange={(e) => setQ(e.target.value)} />
       </label>
-      {q.trim().length >= 2 ? (
-        names.length > 0 && (
-          // Pinned ones first, then Scryfall's order (most played).
-          <NameList names={[...names.filter((n) => pins.includes(n)), ...names.filter((n) => !pins.includes(n))]} pins={pins} onPick={pickName} />
-        )
-      ) : (
-        !picked && pins.length > 0 && <NameList names={pins} pins={pins} onPick={pickName} />
-      )}
+      {q.trim().length >= 2
+        ? names.length > 0 && (
+            // Pinned ones first, then Scryfall's order (most played).
+            <NameList
+              names={[...names.filter((n) => pins.includes(n)), ...names.filter((n) => !pins.includes(n))]}
+              pins={pins}
+              onPick={pickName}
+            />
+          )
+        : !picked && pins.length > 0 && <NameList names={pins} pins={pins} onPick={pickName} />}
       {picked && !arts && !err && <div className="muted">Loading artworks for {picked}…</div>}
       {arts && (
         <div className="arts">
@@ -156,7 +186,12 @@ function CommanderPicker({ game, id, slot }: { game: Game; id: number; slot: 0 |
 
 function PinButton({ name, pinned }: { name: string; pinned: boolean }) {
   return (
-    <button className={`icon-btn small pin${pinned ? ' on' : ''}`} aria-label={pinned ? `Unpin ${name}` : `Pin ${name}`} aria-pressed={pinned} onClick={() => togglePin(name)}>
+    <button
+      className={`icon-btn small pin${pinned ? ' on' : ''}`}
+      aria-label={pinned ? `Unpin ${name}` : `Pin ${name}`}
+      aria-pressed={pinned}
+      onClick={() => togglePin(name)}
+    >
       <UiIcon name="star" size={18} filled={pinned} />
     </button>
   );
@@ -167,7 +202,9 @@ function NameList({ names, pins, onPick }: { names: string[]; pins: string[]; on
     <ul className="suggest">
       {names.map((n) => (
         <li key={n}>
-          <button className="suggest-name" onClick={() => onPick(n)}>{n}</button>
+          <button className="suggest-name" onClick={() => onPick(n)}>
+            {n}
+          </button>
           <PinButton name={n} pinned={pins.includes(n)} />
         </li>
       ))}

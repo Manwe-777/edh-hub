@@ -1,8 +1,11 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { usePress, type PressOptions } from '../usePress';
+
+import { type PressOptions,usePress } from '../usePress';
 
 /** A div with tap / hold / swipe handling. */
-export function Press(props: PressOptions & { className?: string; style?: CSSProperties; children?: ReactNode; label?: string }) {
+export function Press(
+  props: PressOptions & { className?: string; style?: CSSProperties; children?: ReactNode; label?: string },
+) {
   const { className, style, children, label, ...opts } = props;
   const h = usePress(opts);
   return (

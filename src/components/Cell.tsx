@@ -1,15 +1,25 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { type CSSProperties,useEffect, useRef, useState } from 'react';
+
+import { useDefeatLine } from '../defeat';
 import {
-  type CounterKey, type Game, type NumericCounter, type Player, MANA, POOL_MANA,
-  addCmdDamage, addCounter, addLife, addMana, lossCause,
+  addCmdDamage,
+  addCounter,
+  addLife,
+  addMana,
+  type CounterKey,
+  type Game,
+  lossCause,
+  MANA,
+  type NumericCounter,
+  type Player,
+  POOL_MANA,
 } from '../game';
 import { ROTATION, type Seat } from '../layouts';
 import { mutate } from '../store';
-import { useDefeatLine } from '../defeat';
 import { usePresence } from '../usePresence';
-import { Rotated, localSize } from './Rotated';
-import { Press } from './PressButton';
 import { CounterIcon, ManaPoolIcon, ManaSymbol } from './icons';
+import { Press } from './PressButton';
+import { localSize,Rotated } from './Rotated';
 
 const GAP = 3;
 /**
@@ -106,7 +116,16 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
   if (game.roll) {
     body = <RollResult key={game.roll.id} game={game} p={p} font={lifeFont} />;
   } else if (inCmd && !isTarget) {
-    body = <DamageControls source={p} target={game.players[view.target]} rotation={rotation} swipe={swipe} font={lifeFont} pad={pad} />;
+    body = (
+      <DamageControls
+        source={p}
+        target={game.players[view.target]}
+        rotation={rotation}
+        swipe={swipe}
+        font={lifeFont}
+        pad={pad}
+      />
+    );
   } else {
     body = (
       <LifeArea
@@ -123,20 +142,34 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
     );
   }
 
-  const arts = p.commanders.slice(0, p.commanderCount).map((c) => c.art).filter(Boolean) as string[];
-  const cls = [
-    'cell',
-    arts.length ? 'has-art' : 'plain',
-    cause && 'lost',
-    isTarget && 'target',
-  ].filter(Boolean).join(' ');
+  const arts = p.commanders
+    .slice(0, p.commanderCount)
+    .map((c) => c.art)
+    .filter(Boolean) as string[];
+  const cls = ['cell', arts.length ? 'has-art' : 'plain', cause && 'lost', isTarget && 'target']
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={cls} style={style}>
-      <Rotated w={w} h={h} dir={seat.dir} className={`cell-inner${mana.mounted ? ' mana-open' : ''}`} style={{ ['--pc' as string]: p.color }}>
+      <Rotated
+        w={w}
+        h={h}
+        dir={seat.dir}
+        className={`cell-inner${mana.mounted ? ' mana-open' : ''}`}
+        style={{ ['--pc' as string]: p.color }}
+      >
         <div className="cell-bg">
           {arts.map((a, i) => (
-            <div key={i} className="bg-art" style={{ backgroundImage: `url("${a}")`, width: `${100 / arts.length}%`, left: `${(100 / arts.length) * i}%` }} />
+            <div
+              key={i}
+              className="bg-art"
+              style={{
+                backgroundImage: `url("${a}")`,
+                width: `${100 / arts.length}%`,
+                left: `${(100 / arts.length) * i}%`,
+              }}
+            />
           ))}
         </div>
         <div className="cell-layer" style={tally ? { right: tally.width } : undefined}>
@@ -162,8 +195,16 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
         )}
         {mana.mounted && <ManaOverlay p={p} lw={lw} pad={pad} leaving={mana.leaving} />}
         <div className="cell-name" style={{ height: NAME_H, paddingRight: tally?.width }}>
-          {game.monarch === p.id && <span className="name-token"><CounterIcon k="monarch" /></span>}
-          {game.initiative === p.id && <span className="name-token"><CounterIcon k="initiative" /></span>}
+          {game.monarch === p.id && (
+            <span className="name-token">
+              <CounterIcon k="monarch" />
+            </span>
+          )}
+          {game.initiative === p.id && (
+            <span className="name-token">
+              <CounterIcon k="initiative" />
+            </span>
+          )}
           <span className="name-text">{p.name}</span>
           {manaShown && <span className="name-life">{p.life}</span>}
           {inCmd && !isTarget && <span className="dealt">→ {game.players[view.target].name}</span>}
@@ -226,8 +267,12 @@ function tallyLayout(groups: TallySquare[][], h: number, lw: number) {
 }
 
 function Tally(props: {
-  groups: TallySquare[][]; layout: ReturnType<typeof tallyLayout>; bottom: number; rotation: number;
-  onTap: () => void; swipe: (d: 'up' | 'down') => void;
+  groups: TallySquare[][];
+  layout: ReturnType<typeof tallyLayout>;
+  bottom: number;
+  rotation: number;
+  onTap: () => void;
+  swipe: (d: 'up' | 'down') => void;
 }) {
   const { groups, layout, bottom, rotation, onTap, swipe } = props;
   return (
@@ -274,24 +319,46 @@ interface Pad {
 }
 
 function LifeArea(props: {
-  p: Player; rotation: number; swipe: (d: 'up' | 'down') => void; font: number;
-  defeat: string | null; delta: number; caption: string | null; pad: Pad;
+  p: Player;
+  rotation: number;
+  swipe: (d: 'up' | 'down') => void;
+  font: number;
+  defeat: string | null;
+  delta: number;
+  caption: string | null;
+  pad: Pad;
   wrapRef: React.Ref<HTMLDivElement>;
 }) {
   const { p, rotation, swipe, font, defeat, delta, caption, pad, wrapRef } = props;
   const change = (n: number) => () => mutate((g) => addLife(g, p.id, n));
   return (
     <>
-      <Press className="half left" rotation={rotation} onTap={change(-1)} onHold={change(-10)} onSwipe={swipe} label="Lose life">
+      <Press
+        className="half left"
+        rotation={rotation}
+        onTap={change(-1)}
+        onHold={change(-10)}
+        onSwipe={swipe}
+        label="Lose life"
+      >
         <span className="pm">−</span>
       </Press>
-      <Press className="half right" rotation={rotation} onTap={change(1)} onHold={change(10)} onSwipe={swipe} label="Gain life">
+      <Press
+        className="half right"
+        rotation={rotation}
+        onTap={change(1)}
+        onHold={change(10)}
+        onSwipe={swipe}
+        label="Gain life"
+      >
         <span className="pm">+</span>
       </Press>
       <div ref={wrapRef} className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
         {caption && <div className="caption">{caption}</div>}
         {defeat ? (
-          <div key={defeat} className="defeat" style={{ fontSize: Math.max(20, font * 0.34) }}>{defeat}</div>
+          <div key={defeat} className="defeat" style={{ fontSize: Math.max(20, font * 0.34) }}>
+            {defeat}
+          </div>
         ) : (
           <div className="life" style={{ fontSize: font }}>
             {p.life}
@@ -309,8 +376,12 @@ function LifeArea(props: {
 
 /** In a commander-damage view: what this cell's commanders dealt to the target. */
 function DamageControls(props: {
-  source: Player; target: Player; rotation: number;
-  swipe: (d: 'up' | 'down') => void; font: number; pad: Pad;
+  source: Player;
+  target: Player;
+  rotation: number;
+  swipe: (d: 'up' | 'down') => void;
+  font: number;
+  pad: Pad;
 }) {
   const { source: s, target: t, rotation, swipe, font, pad } = props;
   const dmg = t.cmdDamage[s.id];
@@ -319,10 +390,24 @@ function DamageControls(props: {
   if (s.commanderCount === 1) {
     return (
       <>
-        <Press className="half left" rotation={rotation} onTap={change(0, -1)} onHold={change(0, -10)} onSwipe={swipe} label="Remove damage">
+        <Press
+          className="half left"
+          rotation={rotation}
+          onTap={change(0, -1)}
+          onHold={change(0, -10)}
+          onSwipe={swipe}
+          label="Remove damage"
+        >
           <span className="pm from-left">−</span>
         </Press>
-        <Press className="half right" rotation={rotation} onTap={change(0, 1)} onHold={change(0, 10)} onSwipe={swipe} label="Add damage">
+        <Press
+          className="half right"
+          rotation={rotation}
+          onTap={change(0, 1)}
+          onHold={change(0, 10)}
+          onSwipe={swipe}
+          label="Add damage"
+        >
           <span className="pm from-right">+</span>
         </Press>
         <div className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
@@ -337,15 +422,40 @@ function DamageControls(props: {
   const col = (c: 0 | 1) => (
     <div className={`dmg-col from-${c === 0 ? 'left' : 'right'}`}>
       <div className="dmg-row">
-        <Press className="sq-btn" rotation={rotation} onTap={change(c, -1)} onHold={change(c, -10)} onSwipe={swipe} label="Remove damage">−</Press>
-        <div className={`dmg-num${dmg[c] >= 21 ? ' lethal' : ''}`} style={{ fontSize: Math.min(font * 0.55, 56) }}>{dmg[c]}</div>
-        <Press className="sq-btn" rotation={rotation} onTap={change(c, 1)} onHold={change(c, 10)} onSwipe={swipe} label="Add damage">+</Press>
+        <Press
+          className="sq-btn"
+          rotation={rotation}
+          onTap={change(c, -1)}
+          onHold={change(c, -10)}
+          onSwipe={swipe}
+          label="Remove damage"
+        >
+          −
+        </Press>
+        <div className={`dmg-num${dmg[c] >= 21 ? ' lethal' : ''}`} style={{ fontSize: Math.min(font * 0.55, 56) }}>
+          {dmg[c]}
+        </div>
+        <Press
+          className="sq-btn"
+          rotation={rotation}
+          onTap={change(c, 1)}
+          onHold={change(c, 10)}
+          onSwipe={swipe}
+          label="Add damage"
+        >
+          +
+        </Press>
       </div>
       <div className="dmg-name">{s.commanders[c].name || `Commander ${c + 1}`}</div>
     </div>
   );
   return (
-    <Press className="dmg-two" rotation={rotation} onSwipe={swipe} style={{ paddingTop: pad.top, paddingBottom: pad.bottom }}>
+    <Press
+      className="dmg-two"
+      rotation={rotation}
+      onSwipe={swipe}
+      style={{ paddingTop: pad.top, paddingBottom: pad.bottom }}
+    >
       <div className="dmg-cols">
         {col(0)}
         {col(1)}
@@ -375,7 +485,9 @@ function manaLayout(n: number, w: number, h: number) {
   const best = shapes.reduce((a, b) => (b.btn > a.btn ? b : a));
   const btn = Math.floor(Math.max(28, Math.min(56, best.btn)));
   // Each entry only takes the room it needs, so the group stays together in big cells.
-  const slotW = Math.floor(Math.min((w - g * (best.cols - 1)) / best.cols, best.row ? 2 * btn + 84 : Math.max(btn, 56) + 24));
+  const slotW = Math.floor(
+    Math.min((w - g * (best.cols - 1)) / best.cols, best.row ? 2 * btn + 84 : Math.max(btn, 56) + 24),
+  );
   const slotH = Math.min((h - g * (best.rows - 1)) / best.rows, best.row ? btn + 20 : 2 * btn + label + 16);
   return { ...best, btn, slotW, slotH };
 }
@@ -384,13 +496,21 @@ function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad;
   const ref = useRef<HTMLDivElement>(null);
   const [h, setH] = useState(0);
   useEffect(() => setH(ref.current?.clientHeight ?? 0), []);
-  const { cols, row, btn, slotW, slotH } = manaLayout(POOL_MANA.length, lw - 16, Math.max(0, h - pad.top - pad.bottom - 8));
+  const { cols, row, btn, slotW, slotH } = manaLayout(
+    POOL_MANA.length,
+    lw - 16,
+    Math.max(0, h - pad.top - pad.bottom - 8),
+  );
   const change = (c: (typeof MANA)[number], n: number) => () => mutate((g) => addMana(g, p.id, c, n));
   const minus = (c: (typeof MANA)[number]) => (
-    <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, -1)} label={`Remove ${c}`}>−</Press>
+    <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, -1)} label={`Remove ${c}`}>
+      −
+    </Press>
   );
   const plus = (c: (typeof MANA)[number]) => (
-    <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, 1)} label={`Add ${c}`}>+</Press>
+    <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, 1)} label={`Add ${c}`}>
+      +
+    </Press>
   );
   return (
     <div ref={ref} className={`mana-shade${leaving ? ' leaving' : ''}`}>
@@ -428,7 +548,14 @@ function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad;
   );
 }
 
-function CounterBar(props: { game: Game; p: Player; h: number; lw: number; manaMode: boolean; onFlash: (k: NumericCounter) => void }) {
+function CounterBar(props: {
+  game: Game;
+  p: Player;
+  h: number;
+  lw: number;
+  manaMode: boolean;
+  onFlash: (k: NumericCounter) => void;
+}) {
   const { game, p, h, lw, manaMode, onFlash } = props;
   // Partners pay tax separately: a second tax button right after the first.
   const items: (CounterKey | 'mana')[] = [
@@ -445,7 +572,13 @@ function CounterBar(props: { game: Game; p: Player; h: number; lw: number; manaM
   );
 }
 
-function CounterButton(props: { game: Game; p: Player; k: CounterKey | 'mana'; size: number; onFlash: (k: NumericCounter) => void }) {
+function CounterButton(props: {
+  game: Game;
+  p: Player;
+  k: CounterKey | 'mana';
+  size: number;
+  onFlash: (k: NumericCounter) => void;
+}) {
   const { game, p, k, size, onFlash } = props;
   const style = { width: size, height: size, fontSize: size * 0.56 };
   if (k === 'mana') {
@@ -496,7 +629,9 @@ function CounterButton(props: { game: Game; p: Player; k: CounterKey | 'mana'; s
     >
       <CounterIcon k={k} />
       {v > 0 && <span className="badge">{v}</span>}
-      {p.commanderCount === 2 && (k === 'tax' || k === 'tax2') && <span className="ctr-idx">{k === 'tax' ? 1 : 2}</span>}
+      {p.commanderCount === 2 && (k === 'tax' || k === 'tax2') && (
+        <span className="ctr-idx">{k === 'tax' ? 1 : 2}</span>
+      )}
     </Press>
   );
 }

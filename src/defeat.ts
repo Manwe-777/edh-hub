@@ -1,13 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
+
 import type { LossCause } from './game';
 
 const ANY = [
-  'Phased out', 'Mana screwed', 'Annihilated', 'No blockers', 'Countered', 'Exiled',
-  'Board wiped', 'Sacrificed', 'Stuck on three lands', 'Flooded out', 'Tapped out',
-  'Summoning sick', 'Fizzled', 'Bounced', 'Topdecked a land', 'Mulliganed to oblivion',
-  'Wrathed', 'Plowshared', 'Cascaded into nothing', "Archenemy'd", 'Kept a one-lander',
-  'Left the battlefield', 'Gone to the graveyard', 'Removed from the game',
-  "Didn't draw the combo", 'Held up mana for nothing',
+  'Phased out',
+  'Mana screwed',
+  'Annihilated',
+  'No blockers',
+  'Countered',
+  'Exiled',
+  'Board wiped',
+  'Sacrificed',
+  'Stuck on three lands',
+  'Flooded out',
+  'Tapped out',
+  'Summoning sick',
+  'Fizzled',
+  'Bounced',
+  'Topdecked a land',
+  'Mulliganed to oblivion',
+  'Wrathed',
+  'Plowshared',
+  'Cascaded into nothing',
+  "Archenemy'd",
+  'Kept a one-lander',
+  'Left the battlefield',
+  'Gone to the graveyard',
+  'Removed from the game',
+  "Didn't draw the combo",
+  'Held up mana for nothing',
 ];
 
 const BY_CAUSE: Record<LossCause, string[]> = {
