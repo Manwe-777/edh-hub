@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
-  type CounterKey, type Game, type Player, MANA, POOL_MANA,
+  type CounterKey, type Game, type NumericCounter, type Player, MANA, POOL_MANA,
   addCmdDamage, addCounter, addLife, addMana, lossCause,
 } from '../game';
 import { ROTATION, type Seat } from '../layouts';
@@ -12,6 +12,14 @@ import { Press } from './PressButton';
 import { CounterIcon, ManaPoolIcon, ManaSymbol } from './icons';
 
 const GAP = 3;
+/**
+ * Counter flash, in sequence with no overlap: the counter shows in place of the
+ * life total, fades out (expo in, 30–60%), then the life total fades back (expo out, 60–100%).
+ * The counter's half lives in the .flash CSS animation.
+ */
+const FLASH_MS = 1200;
+const EXPO_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
+const FLASH_FRAMES: Keyframe[] = [{ opacity: 0 }, { opacity: 0, offset: 0.6, easing: EXPO_OUT }, { opacity: 1 }];
 const NAME_H = 24;
 
 interface CellProps {
@@ -55,6 +63,16 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
   const cause = lossCause(game, p);
   const defeat = useDefeatLine(p.id, cause);
   const delta = useLifeDelta(p.life, game.epoch);
+  const lifeRef = useRef<HTMLDivElement>(null);
+  const [flash, setFlash] = useState<{ k: NumericCounter; n: number } | null>(null);
+  const flashTimer = useRef<number>(undefined);
+  useEffect(() => () => window.clearTimeout(flashTimer.current), []);
+  const showFlash = (k: NumericCounter) => {
+    setFlash((f) => ({ k, n: (f?.n ?? 0) + 1 }));
+    lifeRef.current?.animate(FLASH_FRAMES, { duration: FLASH_MS, easing: 'linear' });
+    window.clearTimeout(flashTimer.current);
+    flashTimer.current = window.setTimeout(() => setFlash(null), FLASH_MS);
+  };
 
   const view = game.view;
   const inCmd = view.kind === 'cmd';
@@ -99,6 +117,7 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
         defeat={defeat}
         delta={delta}
         pad={pad}
+        wrapRef={lifeRef}
         caption={isTarget ? 'Commander damage' : null}
       />
     );
@@ -120,7 +139,17 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
             <div key={i} className="bg-art" style={{ backgroundImage: `url("${a}")`, width: `${100 / arts.length}%`, left: `${(100 / arts.length) * i}%` }} />
           ))}
         </div>
-        <div className="cell-layer" style={tally ? { right: tally.width } : undefined}>{body}</div>
+        <div className="cell-layer" style={tally ? { right: tally.width } : undefined}>
+          {body}
+          {flash && (
+            <div key={flash.n} className="flash" style={{ top: pad.top, bottom: pad.bottom, fontSize: lifeFont }}>
+              <span className={flash.k === 'poison' && p.counters.poison >= 10 ? 'lethal' : undefined}>
+                <CounterIcon k={flash.k} />
+                {p.counters[flash.k]}
+              </span>
+            </div>
+          )}
+        </div>
         {tally && (
           <Tally
             groups={tallyGroups}
@@ -139,7 +168,7 @@ export function Cell({ game, player: p, seat, vw, vh, onOptions }: CellProps) {
           {manaShown && <span className="name-life">{p.life}</span>}
           {inCmd && !isTarget && <span className="dealt">→ {game.players[view.target].name}</span>}
         </div>
-        {barH > 0 && <CounterBar game={game} p={p} h={barH} lw={lw} manaMode={mana.mounted} />}
+        {barH > 0 && <CounterBar game={game} p={p} h={barH} lw={lw} manaMode={mana.mounted} onFlash={showFlash} />}
       </Rotated>
     </div>
   );
@@ -247,8 +276,9 @@ interface Pad {
 function LifeArea(props: {
   p: Player; rotation: number; swipe: (d: 'up' | 'down') => void; font: number;
   defeat: string | null; delta: number; caption: string | null; pad: Pad;
+  wrapRef: React.Ref<HTMLDivElement>;
 }) {
-  const { p, rotation, swipe, font, defeat, delta, caption, pad } = props;
+  const { p, rotation, swipe, font, defeat, delta, caption, pad, wrapRef } = props;
   const change = (n: number) => () => mutate((g) => addLife(g, p.id, n));
   return (
     <>
@@ -258,7 +288,7 @@ function LifeArea(props: {
       <Press className="half right" rotation={rotation} onTap={change(1)} onHold={change(10)} onSwipe={swipe} label="Gain life">
         <span className="pm">+</span>
       </Press>
-      <div className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
+      <div ref={wrapRef} className="life-wrap" style={{ top: pad.top, bottom: pad.bottom }}>
         {caption && <div className="caption">{caption}</div>}
         {defeat ? (
           <div key={defeat} className="defeat" style={{ fontSize: Math.max(20, font * 0.34) }}>{defeat}</div>
@@ -325,8 +355,10 @@ function DamageControls(props: {
 }
 
 /** Grid shapes for the mana entries; picks whichever gives the largest buttons. */
+const MANA_GAP = 6;
+
 function manaLayout(n: number, w: number, h: number) {
-  const g = 6;
+  const g = MANA_GAP;
   const label = 30; // count + symbol line
   const shapes = [
     { cols: n, rows: 1, row: false },
@@ -341,14 +373,18 @@ function manaLayout(n: number, w: number, h: number) {
     return { ...o, btn };
   });
   const best = shapes.reduce((a, b) => (b.btn > a.btn ? b : a));
-  return { ...best, btn: Math.floor(Math.max(28, Math.min(56, best.btn))) };
+  const btn = Math.floor(Math.max(28, Math.min(56, best.btn)));
+  // Each entry only takes the room it needs, so the group stays together in big cells.
+  const slotW = Math.floor(Math.min((w - g * (best.cols - 1)) / best.cols, best.row ? 2 * btn + 84 : Math.max(btn, 56) + 24));
+  const slotH = Math.min((h - g * (best.rows - 1)) / best.rows, best.row ? btn + 20 : 2 * btn + label + 16);
+  return { ...best, btn, slotW, slotH };
 }
 
 function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad; leaving: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [h, setH] = useState(0);
   useEffect(() => setH(ref.current?.clientHeight ?? 0), []);
-  const { cols, rows, row, btn } = manaLayout(POOL_MANA.length, lw - 16, Math.max(0, h - pad.top - pad.bottom - 8));
+  const { cols, row, btn, slotW, slotH } = manaLayout(POOL_MANA.length, lw - 16, Math.max(0, h - pad.top - pad.bottom - 8));
   const change = (c: (typeof MANA)[number], n: number) => () => mutate((g) => addMana(g, p.id, c, n));
   const minus = (c: (typeof MANA)[number]) => (
     <Press className="sq-btn bare" style={{ width: btn, height: btn }} onTap={change(c, -1)} label={`Remove ${c}`}>−</Press>
@@ -364,12 +400,20 @@ function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad;
           style={{
             top: pad.top,
             bottom: pad.bottom,
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
+            // Exactly `cols` entries per line; centered (absolute + auto margins).
+            left: 0,
+            right: 0,
+            margin: '0 auto',
+            width: cols * slotW + (cols - 1) * MANA_GAP,
           }}
         >
           {POOL_MANA.map((c) => (
-            <div key={c} className={`mana-entry${row ? ' row' : ''}`}>
+            <div
+              key={c}
+              className={`mana-entry${row ? ' row' : ''}`}
+              // Flex-wrapped so an incomplete last row is centered.
+              style={{ width: slotW, height: slotH }}
+            >
               {row ? minus(c) : plus(c)}
               <div className="mana-count" style={{ fontSize: Math.max(16, Math.min(24, btn * 0.48)) }}>
                 <span>{p.mana[c]}</span>
@@ -384,19 +428,21 @@ function ManaOverlay({ p, lw, pad, leaving }: { p: Player; lw: number; pad: Pad;
   );
 }
 
-function CounterBar({ game, p, h, lw, manaMode }: { game: Game; p: Player; h: number; lw: number; manaMode: boolean }) {
+function CounterBar(props: { game: Game; p: Player; h: number; lw: number; manaMode: boolean; onFlash: (k: NumericCounter) => void }) {
+  const { game, p, h, lw, manaMode, onFlash } = props;
   const items: (CounterKey | 'mana')[] = [...p.visibleCounters, 'mana'];
   const size = Math.min(h - 4, lw / items.length - 6);
   return (
     <div className={`bar${manaMode ? ' mana-mode' : ''}`} style={{ height: h }}>
       {items.map((k) => (
-        <CounterButton key={k} game={game} p={p} k={k} size={size} />
+        <CounterButton key={k} game={game} p={p} k={k} size={size} onFlash={onFlash} />
       ))}
     </div>
   );
 }
 
-function CounterButton({ game, p, k, size }: { game: Game; p: Player; k: CounterKey | 'mana'; size: number }) {
+function CounterButton(props: { game: Game; p: Player; k: CounterKey | 'mana'; size: number; onFlash: (k: NumericCounter) => void }) {
+  const { game, p, k, size, onFlash } = props;
   const style = { width: size, height: size, fontSize: size * 0.56 };
   if (k === 'mana') {
     const total = POOL_MANA.reduce((a, c) => a + p.mana[c], 0);
@@ -435,8 +481,14 @@ function CounterButton({ game, p, k, size }: { game: Game; p: Player; k: Counter
       className={`ctr ctr-${k}${v > 0 ? ' on' : ''}${k === 'poison' && v >= 10 ? ' lethal' : ''}`}
       style={style}
       label={k}
-      onTap={() => mutate((g) => addCounter(g, p.id, k, 1))}
-      onHold={() => mutate((g) => addCounter(g, p.id, k, -1))}
+      onTap={() => {
+        mutate((g) => addCounter(g, p.id, k, 1));
+        onFlash(k);
+      }}
+      onHold={() => {
+        mutate((g) => addCounter(g, p.id, k, -1));
+        onFlash(k);
+      }}
     >
       <CounterIcon k={k} />
       {v > 0 && <span className="badge">{v}</span>}
