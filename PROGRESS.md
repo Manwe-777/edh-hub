@@ -63,6 +63,16 @@ Design doc: https://claude.ai/artifact/118v3WkPoY1TgFLYi3Uk8Z
 - `npm run apk:release` builds the signed APK locally. The release key is `~/.android/edh-hub-release.jks`, with its passwords in `android/keystore.properties` (not committed). Back both up: updates only install over builds signed with the same key.
 - Install: `adb install -r releases/edh-hub-<version>-debug.apk`. Debug builds are signed with this machine's debug key, so updates install over each other only when built here.
 
+## Code cleanup
+
+- ESLint (complexity limit 10, max depth 3, React hooks rules, sorted imports, blank lines around functions and multi-line statements) and Prettier with Tailwind class sorting. VS Code formats and fixes on save.
+- TypeScript 6.0, the newest version typescript-eslint supports.
+- `src/constants.ts` holds every constant, `src/types.ts` the shared types.
+- One function per file in `game/`, `store/`, `pins/`, `scryfall/`, `hooks/` and `utils/`; one component per file in `components/common`, `icons`, `cell`, `menu` and `player`.
+- Tailwind CSS v4: panels use utility classes; the table cells keep their component CSS in `@layer components`.
+- Vitest: 93 behaviour tests (game rules, saving and undo, pins, Scryfall search, layout helpers, tap/hold/swipe, timed hooks). `npm run check` runs types, lint, formatting and tests; CI runs it on every push and pull request before releasing.
+- Known issue: Undo restores the whole previous game, so a setting changed after the last undoable action (e.g. a name or a menu switch) is reverted too.
+
 ## Next
 
 - [ ] Real-phone pass: hit-target sizes in 6-player cells, swipe feel, wake lock

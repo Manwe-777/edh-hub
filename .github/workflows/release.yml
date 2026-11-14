@@ -3,6 +3,7 @@ name: Release and deploy
 on:
   push:
     branches: [main]
+  pull_request:
 
 permissions:
   contents: write
@@ -12,11 +13,27 @@ permissions:
   id-token: write
 
 concurrency:
-  group: release
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+
   release:
+    needs: check
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +74,7 @@ jobs:
 
   deploy:
     needs: release
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
